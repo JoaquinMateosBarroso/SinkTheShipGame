@@ -17,8 +17,11 @@
 #include <err.h>
 
 
+
+#define BOARD_SIZE 10
+
 using namespace std;
-int main ( )
+int main2 ( )
 {
     SinkTheShipClient game;
   
@@ -100,7 +103,7 @@ int main ( )
                     bool gameBegins = manageNonGameOk(sbuffer);
                     if (gameBegins)
                     {
-                        game.start(sbuffer.substr(24));
+                        game.start(sbuffer.substr(24), BOARD_SIZE);
                         game.showBoard();
                     }
                 }
@@ -148,14 +151,13 @@ bool manageNonGameOk(string buffer)
     if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
     {
         throw runtime_error(
-            "A not recognized code was received\n:"+buffer);
+            "A not recognized code was received:\n"+buffer);
     }
 
     bool gameBegins = !buffer.find("+Ok. Empezamos partida");
     if (!gameBegins)
     {
-        cout << "Message received from server:" << endl <<
-                buffer << endl;
+        cout << buffer << endl;
     }
 
     return gameBegins;

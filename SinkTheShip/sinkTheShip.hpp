@@ -2,6 +2,7 @@
 #define SINKTHESHIP_HPP
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ class SinkTheShipClient {
 
         // Gets the object prepared for a game with a new board
         // @param board received from server, but cleaned 
-        void start(string board);
+        void start(const string &board, const int boardSize);
 
         // @return Is the game being played?
         bool isGameOpen();
@@ -28,7 +29,22 @@ class SinkTheShipClient {
 
 
     private:
+
+        enum Cell {
+            Boat,
+            Water,
+            Touched,
+            Floaded,
+            Unkwown,
+        };
+
         bool _isGameOpen;
+        
+        int _boardSize;
+
+        vector< vector<Cell> > _myBoard;
+
+        vector< vector<Cell> > _opponentBoard;
 };
 
 

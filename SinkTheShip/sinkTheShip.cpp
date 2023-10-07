@@ -1,5 +1,7 @@
 #include <sinkTheShip.hpp>
 
+#include <sstream>
+
 using namespace std;
 
 
@@ -11,11 +13,26 @@ SinkTheShipClient::SinkTheShipClient()
     _isGameOpen = false;
 }
 
-void SinkTheShipClient::start(string board)
+void SinkTheShipClient::start(const string &board, const int boardSize)
 {
     _isGameOpen = true;
     
-    // TODO
+    _boardSize = boardSize;
+
+    // Initialize a vector to store the matrix
+    _myBoard = vector< vector<Cell> >(_boardSize, vector<Cell>(_boardSize, Cell::Water));
+
+    // Loop through the matrix and populate it
+    for (int i = 0; i < _boardSize; ++i) {
+        for (int j = 0; j < _boardSize; j++)
+        {
+            if (board[(2*_boardSize*i) + 2*j] == 'B')
+            {
+                _myBoard[i][j] = Cell::Boat;
+            }
+        }
+    }
+    // TODO the same but for opponent
     cout << "game starting" << endl;
 }
 
@@ -39,7 +56,29 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
 void SinkTheShipClient::showBoard()
 {
     clearScreen();
-    std::cout << "Here goes the board" << endl << endl;
+    cout << "Here goes the board" << endl << endl;
+
+    cout << "********* MY BOARD *********" << endl << endl;
+
+    for (auto row: _myBoard)
+    {
+        for (auto i: row)
+        {
+            switch (i)
+            {
+                case Cell::Boat: cout << 'B'; break;
+                case Cell::Water: cout << 'A'; break;
+                case Cell::Touched: cout << 'T'; break;
+                case Cell::Floaded: cout << 'H'; break;
+                default: throw runtime_error("Not allowed cell");
+            }
+            cout << ' ';
+        }
+        cout << endl;
+    }
+    
+
+    // TODO the same but for opponent
 }
 
 
@@ -62,3 +101,13 @@ void clearScreen() {
 #endif
 }
 
+
+
+
+
+int main()
+{
+    SinkTheShipClient game;
+    game.start("A,A,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;B,B,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;A,B,A,B,A,B,A,B,A,A;A,A,A,A,A,A,A,A,A,A;A,A,B,B,B,B,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A", 10);
+    game.showBoard();
+}
