@@ -12,8 +12,8 @@ add_subdirectory(SinkTheShip)
 include_directories("User" "SinkTheShip")
 
 
-add_executable(sinkTheShipClient sinkTheShipClient.hpp sinkTheShipClient.cpp)
-target_compile_definitions(sinkTheShipClient PRIVATE -D__VERBOSE__=1)
+add_executable(client sinkTheShipClient.hpp sinkTheShipClient.cpp)
+target_compile_definitions(client PRIVATE -D__VERBOSE__=1)
 
-add_executable(sinkTheShipServer sinkTheShipServer.hpp sinkTheShipServer.cpp)
-target_compile_definitions(sinkTheShipClient PRIVATE -D__VERBOSE__=1)
+add_executable(server sinkTheShipServer.hpp sinkTheShipServer.cpp)
+target_compile_definitions(server PRIVATE -D__VERBOSE__=1)
