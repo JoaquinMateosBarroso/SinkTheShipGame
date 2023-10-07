@@ -101,6 +101,7 @@ int main ( )
                     if (gameBegins)
                     {
                         game.start(sbuffer.substr(24));
+                        game.showBoard();
                     }
                 }
             }

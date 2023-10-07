@@ -14,9 +14,15 @@ SinkTheShipClient::SinkTheShipClient()
 void SinkTheShipClient::start(string board)
 {
     _isGameOpen = true;
+    
+    // TODO
+    cout << "game starting" << endl;
 }
 
-bool isGameOpen();
+bool SinkTheShipClient::isGameOpen()
+{
+    return _isGameOpen;
+}
 
 
 
@@ -26,7 +32,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
 {
     // TODO
 
-return ;
+    return ;
 }
 
 // Shows the board via stdout the board
