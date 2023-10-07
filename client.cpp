@@ -18,7 +18,7 @@
 using namespace std;
 int main ( )
 {
-    bool matchOpened = false;
+    bool gameOpened = false;
     SinkTheShipClient game;
   
 	/*---------------------------------------------------- 
@@ -80,15 +80,23 @@ int main ( )
         auxfds = readfds;
         salida = select(sd+1,&auxfds,NULL,NULL,NULL);
         
-        //Tengo mensaje desde el servidor
+        // Message received from server
         if(FD_ISSET(sd, &auxfds)){
             
             bzero(buffer,sizeof(buffer));
             recv(sd,buffer,sizeof(buffer),0);
             
-            if (!manageError(buffer))
+            bool isError = manageError(buffer);
+            if (!isError)
             {
-
+                if (gameOpened)
+                {
+                    game.playTurn(buffer);
+                }
+                else
+                {
+                    // TODO
+                }
             }
 
 
@@ -146,25 +154,3 @@ bool manageError(string buffer)
     return true;
 }
 
-
-
-
-
-
-// TO be implemented in SinkTheShip
-
-void water(int x, int y)
-{
-    return ;
-}
-
-
-void shipSunk(int x, int y)
-{
-    return ;
-}
-
-void shipTouched(int x, int y)
-{
-    return ;
-}
