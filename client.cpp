@@ -9,10 +9,17 @@
 #include <unistd.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <cstdlib>
 
 
+#include <sinkTheShip.hpp>
+
+
+using namespace std;
 int main ( )
 {
+    bool matchOpened = false;
+    SinkTheShipClient game;
   
 	/*---------------------------------------------------- 
 		Descriptor del socket y buffer de datos                
@@ -21,9 +28,9 @@ int main ( )
 	struct sockaddr_in sockname;
 	char buffer[250];
 	socklen_t len_sockname;
-    	fd_set readfds, auxfds;
-    	int salida;
-    	int fin = 0;
+    fd_set readfds, auxfds;
+    int salida;
+    int fin = 0;
 	
     
 	/* --------------------------------------------------
@@ -79,14 +86,12 @@ int main ( )
             bzero(buffer,sizeof(buffer));
             recv(sd,buffer,sizeof(buffer),0);
             
-            printf("\n%s\n",buffer);
-            
-            if(strcmp(buffer,"Demasiados clientes conectados\n") == 0)
-                fin =1;
-            
-            if(strcmp(buffer,"Desconexión servidor\n") == 0)
-                fin =1;
-            
+            if (!manageError(buffer))
+            {
+
+            }
+
+
         }
         else
         {
@@ -117,6 +122,29 @@ int main ( )
 
 
 
+void clearScreen() {
+#ifdef _WIN32
+    // For Windows
+    system("cls");
+#else
+    // For Linux and macOS
+    system("clear");
+#endif
+}
+
+
+
+bool manageError(string buffer)
+{
+    if (buffer.compare(0, 4, "-Err."))
+    {
+        return false;
+    }
+
+    cout << buffer << endl;
+
+    return true;
+}
 
 
 
