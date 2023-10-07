@@ -1,42 +1,142 @@
 #include <iostream>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <arpa/inet.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <cstring>
+#include <time.h>
+#include <arpa/inet.h>
 
-int main() {
-    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (clientSocket == -1) {
-        std::cerr << "Error al crear el socket del cliente." << std::endl;
-        return 1;
-    }
 
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(2000);
-    serverAddress.sin_addr.s_addr =  inet_addr("127.0.0.1");
+int main ( )
+{
+  
+	/*---------------------------------------------------- 
+		Descriptor del socket y buffer de datos                
+	-----------------------------------------------------*/
+	int sd;
+	struct sockaddr_in sockname;
+	char buffer[250];
+	socklen_t len_sockname;
+    	fd_set readfds, auxfds;
+    	int salida;
+    	int fin = 0;
+	
     
+	/* --------------------------------------------------
+		Se abre el socket 
+	---------------------------------------------------*/
+  	sd = socket (AF_INET, SOCK_STREAM, 0);
+	if (sd == -1)
+	{
+		perror("No se puede abrir el socket cliente\n");
+        exit (1);
+	}
 
-    if (connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-        std::cerr << "Error al conectar al servidor." << std::endl;
-        return 1;
-    }
+   
+    
+	/* ------------------------------------------------------------------
+		Se rellenan los campos de la estructura con la IP del 
+		servidor y el puerto del servicio que solicitamos
+	-------------------------------------------------------------------*/
+	sockname.sin_family = AF_INET;
+	sockname.sin_port = htons(2000);
+	sockname.sin_addr.s_addr =  inet_addr("127.0.0.1");
 
-    char buffer[1024];
-    memset(buffer, 0, sizeof(buffer));
+	/* ------------------------------------------------------------------
+		Se solicita la conexión con el servidor
+	-------------------------------------------------------------------*/
+	len_sockname = sizeof(sockname);
+	
+	if (connect(sd, (struct sockaddr *)&sockname, len_sockname) == -1)
+	{
+		perror ("Error de conexión");
+		exit(1);
+	}
+    
+    //Inicializamos las estructuras
+    FD_ZERO(&auxfds);
+    FD_ZERO(&readfds);
+    
+    FD_SET(0,&readfds);
+    FD_SET(sd,&readfds);
 
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    if (bytesRead <= 0) {
-        std::cerr << "Error al recibir el mensaje del servidor." << std::endl;
-        return 1;
-    }
+    
+	/* ------------------------------------------------------------------
+		Se transmite la información
+	-------------------------------------------------------------------*/
+	do
+	{
+        auxfds = readfds;
+        salida = select(sd+1,&auxfds,NULL,NULL,NULL);
+        
+        //Tengo mensaje desde el servidor
+        if(FD_ISSET(sd, &auxfds)){
+            
+            bzero(buffer,sizeof(buffer));
+            recv(sd,buffer,sizeof(buffer),0);
+            
+            printf("\n%s\n",buffer);
+            
+            if(strcmp(buffer,"Demasiados clientes conectados\n") == 0)
+                fin =1;
+            
+            if(strcmp(buffer,"Desconexión servidor\n") == 0)
+                fin =1;
+            
+        }
+        else
+        {
+            //He introducido información por teclado
+            if(FD_ISSET(0,&auxfds)){
+                bzero(buffer,sizeof(buffer));
+                
+                fgets(buffer,sizeof(buffer),stdin);
+                
+                if(strcmp(buffer,"SALIR\n") == 0){
+                        fin = 1;
+                }
 
-    std::cout << "Mensaje del servidor: " << buffer << std::endl;
-
-    close(clientSocket);
+                send(sd,buffer,sizeof(buffer),0);
+            }
+        }
+        
+        
+				
+    }while(fin == 0);
+		
+    close(sd);
 
     return 0;
+		
+}
+
+
+
+
+
+
+
+
+
+
+// TO be implemented in SinkTheShip
+
+void water(int x, int y)
+{
+    return ;
+}
+
+
+void shipSunk(int x, int y)
+{
+    return ;
+}
+
+void shipTouched(int x, int y)
+{
+    return ;
 }
