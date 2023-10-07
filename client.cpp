@@ -1,4 +1,4 @@
-#include <sinkTheShipClient.hpp>
+#include <client.hpp>
 #include <iostream>
 
 using namespace std;

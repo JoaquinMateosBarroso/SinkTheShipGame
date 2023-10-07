@@ -1,4 +1,4 @@
-#include <sinkTheShipServer.hpp>
+#include <server.hpp>
 #include <iostream>
 
 using namespace std;
