@@ -8,10 +8,15 @@
 
 using namespace std;
 
+
 // Manages a possible error received from server
 // @return whether it was an actual error
 bool manageError(string buffer);
 
-void clearScreen();
+// Manages a +Ok. received from server that is not 
+// a game event
+// @return whether the game has begun
+bool manageNonGameOk(string buffer);
+
 
 #endif

@@ -1,3 +1,7 @@
+#include <client.hpp>
+#include <sinkTheShip.hpp>
+
+
 #include <iostream>
 #include <stdio.h>
 #include <sys/types.h>
@@ -10,15 +14,12 @@
 #include <time.h>
 #include <arpa/inet.h>
 #include <cstdlib>
-
-
-#include <sinkTheShip.hpp>
+#include <err.h>
 
 
 using namespace std;
 int main ( )
 {
-    bool gameOpened = false;
     SinkTheShipClient game;
   
 	/*---------------------------------------------------- 
@@ -75,36 +76,38 @@ int main ( )
 	/* ------------------------------------------------------------------
 		Se transmite la información
 	-------------------------------------------------------------------*/
-	do
-	{
+	do {
         auxfds = readfds;
         salida = select(sd+1,&auxfds,NULL,NULL,NULL);
         
-        // Message received from server
-        if(FD_ISSET(sd, &auxfds)){
+        if(FD_ISSET(sd, &auxfds)){ // Message received from server
             
             bzero(buffer,sizeof(buffer));
             recv(sd,buffer,sizeof(buffer),0);
+
+            string sbuffer = buffer;
             
-            bool isError = manageError(buffer);
+            bool isError = manageError(sbuffer);
             if (!isError)
             {
-                if (gameOpened)
+                if (game.isGameOpen())
                 {
-                    game.playTurn(buffer);
+                    game.playTurn(sbuffer);
+                    game.showBoard();
                 }
                 else
                 {
-                    // TODO
+                    bool gameBegins = manageNonGameOk(sbuffer);
+                    if (gameBegins)
+                    {
+                        game.start(sbuffer.substr(24));
+                    }
                 }
             }
-
-
         }
-        else
+        else // Message not received from server
         {
-            //He introducido información por teclado
-            if(FD_ISSET(0,&auxfds)){
+            if(FD_ISSET(0,&auxfds)){ // Text introduced via keyboard
                 bzero(buffer,sizeof(buffer));
                 
                 fgets(buffer,sizeof(buffer),stdin);
@@ -115,11 +118,8 @@ int main ( )
 
                 send(sd,buffer,sizeof(buffer),0);
             }
-        }
-        
-        
-				
-    }while(fin == 0);
+        }				
+    } while(!fin);
 		
     close(sd);
 
@@ -130,21 +130,9 @@ int main ( )
 
 
 
-void clearScreen() {
-#ifdef _WIN32
-    // For Windows
-    system("cls");
-#else
-    // For Linux and macOS
-    system("clear");
-#endif
-}
-
-
-
 bool manageError(string buffer)
 {
-    if (buffer.compare(0, 4, "-Err."))
+    if (buffer.compare(0, 3, "-Err")) // It is not -Err
     {
         return false;
     }
@@ -154,3 +142,20 @@ bool manageError(string buffer)
     return true;
 }
 
+bool manageNonGameOk(string buffer)
+{
+    if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
+    {
+        throw runtime_error(
+            "A not recognized code was received\n:"+buffer);
+    }
+
+    bool gameBegins = !buffer.find("+Ok. Empezamos partida");
+    if (!gameBegins)
+    {
+        cout << "Message received from server:" << endl <<
+                buffer << endl;
+    }
+
+    return gameBegins;
+}
