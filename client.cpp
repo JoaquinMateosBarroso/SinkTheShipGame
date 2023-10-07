@@ -21,7 +21,7 @@
 #define BOARD_SIZE 10
 
 using namespace std;
-int main2 ( )
+int main( )
 {
     SinkTheShipClient game;
   
