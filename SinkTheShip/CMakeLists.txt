@@ -7,6 +7,5 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb3")
 include_directories(".")
 
-add_executable(.DebugSinkTheShip sinkTheShip.cpp sinkTheShip.hpp)
 
 add_library(sinkTheShip sinkTheShip.hpp sinkTheShip.cpp)
