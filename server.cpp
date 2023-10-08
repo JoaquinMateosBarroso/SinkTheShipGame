@@ -10,7 +10,7 @@
 #include <sstream>
 
 #define MAX_CLIENTS 10
-#define SERVER_PORT 2000
+#define SERVER_PORT 2007
 #define MSG_SIZE 250
 
 class Server {
@@ -49,7 +49,7 @@ class Server {
 
             _addr_size = sizeof(struct sockaddr_in);
 
-            if (client_socket = accept(_server_socket, (struct sockaddr*) &_client_addr, &_addr_size) == -1) {
+            if ((client_socket = accept(_server_socket, (struct sockaddr*) &_client_addr, &_addr_size)) == -1) {
                 perror("Error aceptando conexiones.");
                 exit(-1);
             }
@@ -97,23 +97,20 @@ class Server {
                 {
                     if (FD_ISSET(socket, &auxfds))
                     {
-                        if (socket == _server_socket) {
+                        if (socket == _server_socket) { 
+
                             int client_socket = accept_connection();
+
                             if(_n_clients < MAX_CLIENTS){
                                 std::cout << "Nueva conexión: " << inet_ntoa(_client_addr.sin_addr) << ":" << ntohs(_client_addr.sin_port) << std::endl;
 
-                                for (int i = 0; i < MAX_CLIENTS; ++i) {
-                                    if(_clients[i] == 0) {
-                                        _clients[i] = client_socket;
-                                        break;
-                                    }
-                                }
+                                int newClientSocket = client_socket;
+                                _clients[_n_clients++] = newClientSocket;
 
                                 FD_SET(client_socket, &readfds);
 
-                                const char* response = "+ Ok. User connected.";
+                                const char* response = "+Ok. Usuario conectado";
                                 send(client_socket, response, strlen(response), 0);
-
                             }
                             else
                             {
@@ -122,7 +119,7 @@ class Server {
                                 send(client_socket, _buffer, sizeof(_buffer), 0);
                                 close(client_socket);
                             }
-                        } else if (socket == STDIN_FILENO) {
+                        } else if (socket == STDIN_FILENO) { printf("Fileno\n"); fflush(stdin);
                             bzero(_buffer, sizeof(_buffer));
                             fgets(_buffer, sizeof(_buffer),stdin);
                             
@@ -144,7 +141,7 @@ class Server {
                             
                             if(n_recv > 0){
                                 if(strcmp(_buffer, "SALIR\n") == 0){
-                                    exit_client(socket, &readfds); 
+                                    exit_client(socket, &readfds);
                                 }
                                 else{
                                     handleClientMsg(socket, &readfds);
@@ -153,7 +150,7 @@ class Server {
                             if(n_recv== 0)
                             {
                                 std::cout << "El socket " << socket << " ha introducido ctrl+c" << std::endl;
-                                exit_client(socket, &readfds); 
+                                exit_client(socket, &readfds);
                             }
                         }
                     }
@@ -176,6 +173,8 @@ class Server {
                 (_clients[j] = _clients[j+1]);
             
             _n_clients--;
+
+            std::cout << "El socket " << socket << " se ha desconectado." << std::endl;
 
             // Doing something when a client exits
         }
