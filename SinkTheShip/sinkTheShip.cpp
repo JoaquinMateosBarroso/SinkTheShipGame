@@ -8,14 +8,9 @@ using namespace std;
 /***********************************************************
  * SinkTheShipClient  
 ************************************************************/
-SinkTheShipClient::SinkTheShipClient()
-{
-    _isGameOpen = false;
-}
 
 void SinkTheShipClient::start(const string &board, const int boardSize)
 {
-    _isGameOpen = true;
     
     _boardSize = boardSize;
 
@@ -36,10 +31,7 @@ void SinkTheShipClient::start(const string &board, const int boardSize)
     cout << "game starting" << endl;
 }
 
-bool SinkTheShipClient::isGameOpen()
-{
-    return _isGameOpen;
-}
+
 
 
 
@@ -66,10 +58,10 @@ void SinkTheShipClient::showBoard()
         {
             switch (i)
             {
-                case Cell::Boat: cout << 'B'; break;
-                case Cell::Water: cout << 'A'; break;
-                case Cell::Touched: cout << 'T'; break;
-                case Cell::Floaded: cout << 'H'; break;
+                case Boat: cout << 'B'; break;
+                case Water: cout << 'A'; break;
+                case Touched: cout << 'T'; break;
+                case Floaded: cout << 'H'; break;
                 default: throw runtime_error("Not allowed cell");
             }
             cout << ' ';

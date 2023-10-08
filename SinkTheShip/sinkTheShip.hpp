@@ -9,7 +9,7 @@ using namespace std;
 // A class that will be used by the TCP client
 class SinkTheShipClient {
     public:
-        SinkTheShipClient();
+        SinkTheShipClient() {}
 
         // Gets the object prepared for a game with a new board
         // @param board received from server, but cleaned 
@@ -37,8 +37,6 @@ class SinkTheShipClient {
             Floaded,
             Unkwown,
         };
-
-        bool _isGameOpen;
         
         int _boardSize;
 

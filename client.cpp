@@ -17,118 +17,150 @@
 #include <err.h>
 
 
+#define SERVER_PORT 2007
+#define SERVER_IP "127.0.0.1"
 
 #define BOARD_SIZE 10
 
 using namespace std;
 int main( )
 {
-    SinkTheShipClient game;
-  
-	/*---------------------------------------------------- 
-		Descriptor del socket y buffer de datos                
-	-----------------------------------------------------*/
-	int sd;
-	struct sockaddr_in sockname;
-	char buffer[250];
-	socklen_t len_sockname;
-    fd_set readfds, auxfds;
-    int salida;
-    int fin = 0;
-	
+
+	Client client(SERVER_IP, SERVER_PORT);
     
-	/* --------------------------------------------------
-		Se abre el socket 
-	---------------------------------------------------*/
-  	sd = socket (AF_INET, SOCK_STREAM, 0);
-	if (sd == -1)
+    client.start();
+
+    client.finish();
+
+    return 0;
+		
+}
+
+
+Client::Client(string serverIpAddr, int serverPort)
+{
+    _serverIpAddr = serverIpAddr;
+    _serverPort = serverPort;
+}
+
+void Client::start()
+{
+  	openSocket();
+
+    connectSocket();
+
+    initStructures();
+
+    
+    bool fin = false;
+	do {
+        readMessage();
+        
+        if(FD_ISSET(_socketDescriptor, &_auxfds)) {
+            manageServerMessage();
+        }
+        else if(FD_ISSET(0,&_auxfds)) {
+            fin = manageTerminalInput();
+        }
+        else {
+            perror("Message receive from an unkwown socket");
+            exit(-1);
+        }
+    } while(!fin);
+}
+
+
+void Client::openSocket()
+{
+    _socketDescriptor = socket (AF_INET, SOCK_STREAM, 0);
+	if (_socketDescriptor == -1)
 	{
 		perror("No se puede abrir el socket cliente\n");
         exit (1);
 	}
+}
 
-   
+void Client::initStructures()
+{
+    FD_ZERO(&_auxfds);
+    FD_ZERO(&_readfds);
     
-	/* ------------------------------------------------------------------
-		Se rellenan los campos de la estructura con la IP del 
-		servidor y el puerto del servicio que solicitamos
-	-------------------------------------------------------------------*/
-	sockname.sin_family = AF_INET;
-	sockname.sin_port = htons(2007);
-	sockname.sin_addr.s_addr =  inet_addr("127.0.0.1");
+    FD_SET(0,&_readfds);
+    FD_SET(_socketDescriptor,&_readfds);
+}
 
-	/* ------------------------------------------------------------------
-		Se solicita la conexión con el servidor
-	-------------------------------------------------------------------*/
-	len_sockname = sizeof(sockname);
+void Client::connectSocket()
+{
+    struct sockaddr_in _sockName;
+    _sockName.sin_family = AF_INET;
+	_sockName.sin_port = htons(_serverPort);
+	_sockName.sin_addr.s_addr = inet_addr(_serverIpAddr.c_str());
+    
+    int len_sockname = sizeof(_sockName);
 	
-	if (connect(sd, (struct sockaddr *)&sockname, len_sockname) == -1)
+	if (connect(_socketDescriptor, (struct sockaddr *)&_sockName, len_sockname) == -1)
 	{
 		perror ("Error de conexión");
 		exit(1);
 	}
-    
-    //Inicializamos las estructuras
-    FD_ZERO(&auxfds);
-    FD_ZERO(&readfds);
-    
-    FD_SET(0,&readfds);
-    FD_SET(sd,&readfds);
+    _state = Connected;
+}
 
-    
-	/* ------------------------------------------------------------------
-		Se transmite la información
-	-------------------------------------------------------------------*/
-	do {
-        auxfds = readfds;
-        salida = select(sd+1,&auxfds,NULL,NULL,NULL);
-        
-        if(FD_ISSET(sd, &auxfds)){ // Message received from server
-            
-            bzero(buffer,sizeof(buffer));
-            recv(sd,buffer,sizeof(buffer),0);
+void Client::readMessage()
+{
+    _auxfds = _readfds;
 
-            string sbuffer = buffer;
-            
-            bool isError = manageError(sbuffer);
-            if (!isError)
-            {
-                if (game.isGameOpen())
-                {
-                    game.playTurn(sbuffer);
-                    game.showBoard();
-                }
-                else
-                {
-                    bool gameBegins = manageNonGameOk(sbuffer);
-                    if (gameBegins)
-                    {
-                        game.start(sbuffer.substr(24), BOARD_SIZE);
-                        game.showBoard();
-                    }
-                }
-            }
-        }
-        else // Message not received from server
+    int n_received_msg;
+    n_received_msg = select(_socketDescriptor+1,&_auxfds,NULL,NULL,NULL);
+
+    if (n_received_msg == -1)
+    {
+        perror("Error al escuchar recibir el mensaje del cliente.");
+        close(_socketDescriptor);
+        exit(-1);
+    }
+}
+
+void Client::manageServerMessage()
+{
+    bzero(_buffer, sizeof(_buffer));
+            recv(_socketDescriptor, _buffer, sizeof(_buffer),0);
+
+    bool isError = manageError(_buffer);
+
+    if (!isError)
+    {
+        switch (_state)
         {
-            if(FD_ISSET(0,&auxfds)){ // Text introduced via keyboard
-                bzero(buffer,sizeof(buffer));
-                
-                fgets(buffer,sizeof(buffer),stdin);
-                
-                if(strcmp(buffer,"SALIR\n") == 0){
-                        fin = 1;
-                }
+            case Connected: manageConnectedMessage(); break;
+            case WaitingForGame: manageWaitingForGameMessage(); break;
+            case Playing: managePlayingMessage(); break;
+            default: perror("Estado desconocido"); exit(-1);
+        }
+    }
+}
 
-                send(sd,buffer,sizeof(buffer),0);
-            }
-        }				
-    } while(!fin);
-		
-    close(sd);
+bool Client::manageTerminalInput()
+{
+    bool fin = false;
+    bzero(_buffer,sizeof(_buffer));
+            
+    fgets(_buffer,sizeof(_buffer),stdin);
+    
+    if(strcmp(_buffer,"SALIR\n") == 0){
+            fin = 1;
+    }
 
-    return 0;
-		
+    send(_socketDescriptor, _buffer,sizeof(_buffer),0);
+    
+    return fin;
+}
+
+
+
+void Client::finish()
+{
+    close(_socketDescriptor);
 }
 
 
@@ -146,19 +178,78 @@ bool manageError(string buffer)
     return true;
 }
 
-bool manageNonGameOk(string buffer)
+bool Client::manageNonGameOk(string buffer)
 {
-    if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
+    if (_state == Connected)
     {
-        throw runtime_error(
-            "A not recognized code was received:\n"+buffer);
+        if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
+        {
+            throw runtime_error(
+                "A not recognized code was received:\n"+buffer);
+        }
+
+        bool startWaiting = !buffer.find("+Ok. Empezamos partida");
+        if (startWaiting)
+        {
+            cout << buffer << endl;
+            _state = WaitingForGame;
+        }
+        bool gameBegins = !buffer.find("+Ok. Empezamos partida");
+        if (!gameBegins)
+        {
+            cout << buffer << endl;
+        }
+        return gameBegins;
+    }
+    else if (_state == WaitingForGame)
+    {
+        if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
+        {
+            throw runtime_error(
+                "A not recognized code was received:\n"+buffer);
+        }
+
+        bool gameBegins = !buffer.find("+Ok. Empezamos partida");
+        if (!gameBegins)
+        {
+            cout << buffer << endl;
+        }
+        return gameBegins;
+    }
+    else
+    {
+        perror("Part of code that should not be accesible");
+        exit(-1);
     }
 
-    bool gameBegins = !buffer.find("+Ok. Empezamos partida");
-    if (!gameBegins)
-    {
-        cout << buffer << endl;
-    }
+}
 
-    return gameBegins;
+
+
+void Client::manageConnectedMessage()
+{
+    // TODO make logic for whether we start waiting in this turn
+    bool startWaiting = manageNonGameOk(_buffer);
+    if (startWaiting)
+    {
+        _state = WaitingForGame;
+    }
+}
+
+void Client::manageWaitingForGameMessage()
+{
+    bool gameBegins = manageNonGameOk(_buffer);
+    if (gameBegins)
+    {
+        _game.start(string(_buffer).substr(24), BOARD_SIZE);
+        _game.showBoard();
+        _state = Playing;
+    }
+}
+
+void Client::managePlayingMessage()
+{
+    // TODO make logic for whether the game ends in this turn
+    _game.playTurn(_buffer);
+    _game.showBoard();
 }

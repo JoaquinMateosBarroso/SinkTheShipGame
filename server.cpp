@@ -181,6 +181,7 @@ class Server {
 
         void handleClientMsg(int socket, fd_set * readfds) {
             std::string keyword = getFirstWord(_buffer);
+            // TODO
             // ejecuta la función que corresponda segun la keyword.
             // Será un diccionario en el que la clave sera la keyword
             // y el valor será un puntero a la funcion a ejecutar
