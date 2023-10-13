@@ -7,16 +7,9 @@
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <signal.h>
-#include <sstream>
 
-#define MAX_CLIENTS 10
+
 #define SERVER_PORT 2007
-#define MSG_SIZE 250
 
 class Server {
     private:
@@ -276,13 +269,13 @@ void Handlers::handleRegister(int socket, SocketState &socketState, char* buffer
     std::string password = getParam(buffer, "-p");
 
     if (username == "" || password == "") {
-        const char* response = "-Err. No se ha podido registrar el usuario";
+        const char* response = "-Err. Usuario incorrecto";
         send(socket, response, strlen(response), 0);
         return;
     }
 
     if (isRegistered(username)) {
-        const char* response = "-Err. El usuario ya está registrado";
+        const char* response = "-Err. Usuario incorrecto";
         send(socket, response, strlen(response), 0);
         return;
     }
@@ -291,4 +284,41 @@ void Handlers::handleRegister(int socket, SocketState &socketState, char* buffer
 
     const char* response = "+Ok. Usuario registrado";
     send(socket, response, strlen(response), 0);
+}
+
+
+
+void Handlers::handleUser(int socket, SocketState &socketState, char* buffer, int bufferSize)
+{
+    std::string username = getParam(buffer, "USUARIO");
+
+    if (username == "") {
+        const char* response = "-Err. No se ha podido iniciar sesión";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    if (!isRegistered(username)) {
+        const char* response = "-Err. El usuario no está registrado";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    socketState.user = username;
+
+    const char* response = "+Ok. Usuario correcto";
+    send(socket, response, strlen(response), 0);
+}
+
+
+
+void Handlers::handleStartGame(int socket, SocketState &socketState, char* buffer, int bufferSize)
+{
+    if (!socketState.isLogged) {
+        const char* response = "-Err. Usuario no logueado";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+    
+    socketState.game = _gameManager.startGame(socket, socketState.user);
 }

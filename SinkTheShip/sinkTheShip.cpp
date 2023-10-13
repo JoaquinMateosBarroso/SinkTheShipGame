@@ -5,6 +5,44 @@
 using namespace std;
 
 
+/********************************************************
+ * SinkTheShipServer
+*********************************************************/
+
+
+bool SinkTheShipServer::addPlayer(const int socket, const string &username) {
+    if (_free) {
+        _player1.socket = socket;
+        _player1.username = username;
+        _free = false;
+        return true;
+    } else if (_started) {
+        _player2.socket = socket;
+        _player2.username = username;
+    } else {
+        return false;
+    }
+}
+
+void SinkTheShipServer::closeGame()
+{
+    // TODO
+
+
+    //
+    _started = false;
+    _free = true;
+}
+
+
+
+
+
+
+
+
+
+
 /***********************************************************
  * SinkTheShipClient  
 ************************************************************/

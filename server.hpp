@@ -2,6 +2,7 @@
 #define SINKTHESHIPSERVER_HPP
 
 #include <sinkTheShip.hpp>
+#include <GameManager.hpp>
 #include <user.hpp>
 
 struct SocketState {
@@ -16,7 +17,7 @@ class Handlers {
 
     public:
         /**
-         * @brief Handle the register message
+         * @brief Handle the register message "REGISTER -u <username> -p <password>"
          * 
          * @param socket 
          * @param socketState
@@ -25,14 +26,32 @@ class Handlers {
         */
         void handleRegister(int socket, SocketState &socketState, char* buffer, int bufferSize);
         
+        /**
+         * TODO
+         * @brief Handle the user message "USER <username>"
+        */
         void handleUser(int socket, SocketState &socketState, char* buffer, int bufferSize);
-
+        /** 
+         * TODO
+         * @brief Handle the password message "PASSWORD <password>"
+        */
         void handlePassword(int socket, SocketState &socketState, char* buffer, int bufferSize);
 
+        /** 
+         * TODO
+         * @brief Handle the message "INICIO-JUEGO"
+        */
         void handleStartGame(int socket, SocketState &socketState, char* buffer, int bufferSize);
 
+        /** 
+         * TODO
+         * @brief Handle the message "DISPATO <letra>, <numero>"
+        */
         void handleShoot(int socket, SocketState &socketState, char* buffer, int bufferSize);
 
+        /** 
+         * TODO
+        */
         void handleExit(int socket, SocketState &socketState, char* buffer, int bufferSize);
 
     private:
@@ -44,6 +63,9 @@ class Handlers {
 
         std::string getParam(const std::string& buffer, const std::string &option);
 
+
+        // Attributes
+        GameManager _gameManager;
 };
 
 
