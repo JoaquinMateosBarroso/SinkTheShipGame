@@ -184,6 +184,11 @@ bool Client::manageNonGameOk(string buffer)
     {
         if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
         {
+            if(strcmp(_buffer,"Desconexión servidor") == 0){
+                cout << "El servidor se ha desconectado, salimos" << endl;
+                close(_socketDescriptor);
+                exit(1);
+            }
             throw runtime_error(
                 "A not recognized code was received:\n"+buffer);
         }
