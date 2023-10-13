@@ -1,3 +1,9 @@
+#include <server.hpp>
+#include <string>
+#include <sstream>
+#include <fstream>
+
+
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
@@ -6,7 +12,6 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <signal.h>
-#include <string>
 #include <sstream>
 
 #define MAX_CLIENTS 10
@@ -196,14 +201,93 @@ class Server {
 };
 
 int main() {
-    int serverSocketDescriptor, clientSocketDescriptor;
-    struct sockaddr_in serverAddress, clientAddress;
-    socklen_t clientLength;
 
     Server server = Server(SERVER_PORT);
+
     server.start();
 
     return 0;
 }
 
 
+std::string Handlers::getParam(const std::string& buffer, const std::string &option)
+{
+    std::string::size_type pos = buffer.find(option);
+    if (pos == std::string::npos) {
+        return "";
+    }
+
+    std::string::size_type pos2 = buffer.find(" ", pos + option.length() + 1);
+    if (pos2 == std::string::npos) {
+        return "";
+    }
+
+    return buffer.substr(pos + option.length() + 1, pos2 - pos - option.length() - 1);
+}
+
+void Handlers::registerUser(const std::string &username, const std::string &password)
+{
+    std::ofstream usersFile("users.txt", std::ios_base::app);
+    usersFile << username << " " << password << std::endl;
+    usersFile.close();
+}
+
+bool Handlers::isRegistered(const std::string &username)
+{
+    std::ifstream usersFile;
+    usersFile.open("users.txt");
+
+    std::string line;
+    while (std::getline(usersFile, line)) {
+        std::string user = line.substr(0, line.find(" "));
+        if (user == username) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::string Handlers::getPassword(const std::string &user)
+{
+    std::ifstream usersFile;
+    usersFile.open("users.txt");
+
+    std::string line;
+    while (std::getline(usersFile, line)) {
+        std::string sLine = std::string(line);
+        std::string aux = sLine.substr(sLine.find(" ")+1, sLine.length());
+        return aux;
+    }
+
+    return "";
+}
+
+
+
+
+// @param buffer will contain: REGISTRO -u <username> -p <password>
+// @brief checks whether the username is already registered, and, if it is not,
+// registers the user and saves it into the textfile users.txt
+void Handlers::handleRegister(int socket, SocketState &socketState, char* buffer, int bufferSize)
+{
+    std::string username = getParam(buffer, "-u");
+    std::string password = getParam(buffer, "-p");
+
+    if (username == "" || password == "") {
+        const char* response = "-Err. No se ha podido registrar el usuario";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    if (isRegistered(username)) {
+        const char* response = "-Err. El usuario ya está registrado";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    registerUser(username, password);
+
+    const char* response = "+Ok. Usuario registrado";
+    send(socket, response, strlen(response), 0);
+}

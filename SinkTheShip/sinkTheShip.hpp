@@ -46,6 +46,42 @@ class SinkTheShipClient {
 };
 
 
+// A class that will be used by the TCP client
+class SinkTheShipServer {
+    public:
+        // SinkTheShipClient() {}
+
+        // Gets the object prepared for a game with a new board
+        // @param board received from server, but cleaned 
+        void start(const string &board, const int boardSize);
+
+        // @return Is the game being played?
+        bool isGameOpen();
+
+
+        // Plays a turn
+        // @param buffer received from server
+        void playTurn(const std::string &buffer);
+
+
+        // Shows the board via stdout
+        void showBoard();
+
+
+    private:
+
+        enum Cell {
+            Boat,
+            Water,
+            Touched,
+            Floaded,
+            Unkwown,
+        };
+        
+        vector<SinkTheShipClient> _games;
+};
+
+
 /***********************************************************
  * Extra functionalities
 ************************************************************/

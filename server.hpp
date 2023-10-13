@@ -4,6 +4,48 @@
 #include <sinkTheShip.hpp>
 #include <user.hpp>
 
+struct SocketState {
+    std::string user;
+    std::string password;
+    bool isLogged;
+    int game;
+    bool isYourTurn;
+};
+
+class Handlers {
+
+    public:
+        /**
+         * @brief Handle the register message
+         * 
+         * @param socket 
+         * @param socketState
+         * @param buffer 
+         * @param bufferSize
+        */
+        void handleRegister(int socket, SocketState &socketState, char* buffer, int bufferSize);
+        
+        void handleUser(int socket, SocketState &socketState, char* buffer, int bufferSize);
+
+        void handlePassword(int socket, SocketState &socketState, char* buffer, int bufferSize);
+
+        void handleStartGame(int socket, SocketState &socketState, char* buffer, int bufferSize);
+
+        void handleShoot(int socket, SocketState &socketState, char* buffer, int bufferSize);
+
+        void handleExit(int socket, SocketState &socketState, char* buffer, int bufferSize);
+
+    private:
+        bool isRegistered(const std::string &username);
+
+        void registerUser(const std::string &username, const std::string &password);
+
+        std::string getPassword(const std::string &user);
+
+        std::string getParam(const std::string& buffer, const std::string &option);
+
+};
+
 
 
 #endif
