@@ -8,5 +8,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb3")
 include_directories(".")
 
 
-add_library(sinkTheShip sinkTheShip.hpp sinkTheShip.cpp
-                        GameManager.hpp GameManager.cpp)
+
+add_library(sinkTheShip sinkTheShip.cpp GameManager.cpp)
+target_include_directories(sinkTheShip PUBLIC ${CMAKE_SOURCE_DIR}/SinkTheShip)

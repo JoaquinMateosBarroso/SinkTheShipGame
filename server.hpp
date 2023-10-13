@@ -5,6 +5,8 @@
 #include <GameManager.hpp>
 #include <user.hpp>
 
+#include <GameManager.cpp> // I know this shouldn't be done, but I'm having problems with CMakeLists.txt
+
 struct SocketState {
     std::string user;
     std::string password;

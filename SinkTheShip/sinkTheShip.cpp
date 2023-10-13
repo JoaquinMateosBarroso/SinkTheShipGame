@@ -19,9 +19,8 @@ bool SinkTheShipServer::addPlayer(const int socket, const string &username) {
     } else if (_started) {
         _player2.socket = socket;
         _player2.username = username;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void SinkTheShipServer::closeGame()

@@ -13,9 +13,7 @@ include_directories("User" "SinkTheShip")
 
 
 add_executable(client client.hpp client.cpp)
-target_link_libraries(client user sinkTheShip)
-target_compile_definitions(client PRIVATE -D__VERBOSE__=1)
+target_link_libraries(client PRIVATE user sinkTheShip GameManager)
 
 add_executable(server server.hpp server.cpp)
-target_link_libraries(client user sinkTheShip)
-target_compile_definitions(server PRIVATE -D__VERBOSE__=1)
+target_link_libraries(client PRIVATE user sinkTheShip GameManager)
