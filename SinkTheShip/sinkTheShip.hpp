@@ -17,6 +17,10 @@ enum Cell {
     Unkwown,
 };
 
+struct Player {
+int socket;
+string username;
+};
 
 
 class SinkTheShipServer {
@@ -42,13 +46,15 @@ class SinkTheShipServer {
 
         void closeGame();
 
+        // @return Could the player be added to a game?
         bool addPlayer(const int socket, const string &username);
 
+        Player& getPlayer(const int id) {
+            return (id==1)? _player1: _player2;
+        }
+
     private:
-        struct Player {
-            int socket;
-            string username;
-        };
+
 
         Player _player1;
         Player _player2;

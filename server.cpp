@@ -321,4 +321,5 @@ void Handlers::handleStartGame(int socket, SocketState &socketState, char* buffe
     }
     
     socketState.game = _gameManager.startGame(socket, socketState.user);
+
 }

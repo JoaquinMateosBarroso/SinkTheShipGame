@@ -15,16 +15,26 @@
 
 class GameManager {
 public:
-    GameManager() { }
+    GameManager() {
+        _waitingGame = -1;
+     }
     /**
      * @brief Starts a game
-     * @return -1 if game could not be started, otherwise returns the game id (position in the vector)
+     * @return -1 if game could not be reserved, otherwise returns the game id (position in the vector)
     */
     int startGame(const int socket, const std::string &username);
 
+    SinkTheShipServer& getGame(const int id) {
+        return _games[id];
+    }
+
 private:
     SinkTheShipServer _games[10];
+    int _waitingGame;
 
+
+
+    int lookForGame(const int socket, const std::string &username);
 };
 
 
