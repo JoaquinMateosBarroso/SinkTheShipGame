@@ -120,18 +120,20 @@ class Server {
                             else
                             {
                                 bzero(_buffer, sizeof(_buffer));
-                                strcpy(_buffer, "Demasiados clientes conectados\n");
+                                strcpy(_buffer, "Demasiados clientes conectados");
                                 send(client_socket, _buffer, sizeof(_buffer), 0);
                                 close(client_socket);
                             }
-                        } else if (socket == STDIN_FILENO) { printf("Fileno\n"); fflush(stdin);
+                        } else if (socket == STDIN_FILENO) { 
+                            printf("Fileno"); 
+                            fflush(stdin);
                             bzero(_buffer, sizeof(_buffer));
                             fgets(_buffer, sizeof(_buffer),stdin);
                             
-                            if(strcmp(_buffer, "SALIR\n") == 0){
+                            if(strcmp(_buffer, "SALIR") == 0){
                                 for (int j = 0; j < _n_clients; j++){
                                     bzero(_buffer, sizeof(_buffer));
-                                    strcpy(_buffer, "Desconexión servidor\n"); 
+                                    strcpy(_buffer, "Desconexión servidor"); 
                                     send(_clients[j], _buffer, sizeof(_buffer), 0);
                                     close(_clients[j]);
                                     FD_CLR(_clients[j], &readfds);
@@ -145,7 +147,7 @@ class Server {
                             int n_recv = recv(socket, _buffer, sizeof(_buffer),0);
                             
                             if(n_recv > 0){
-                                if(strcmp(_buffer, "SALIR\n") == 0){
+                                if(strcmp(_buffer, "SALIR") == 0){
                                     exit_client(socket, &readfds);
                                 }
                                 else{
@@ -201,7 +203,10 @@ class Server {
 };
 
 int main() {
+<<<<<<< HEAD
 
+=======
+>>>>>>> refs/remotes/origin/main
     Server server = Server(SERVER_PORT);
 
     server.start();
