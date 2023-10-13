@@ -203,10 +203,6 @@ class Server {
 };
 
 int main() {
-<<<<<<< HEAD
-
-=======
->>>>>>> refs/remotes/origin/main
     Server server = Server(SERVER_PORT);
 
     server.start();
