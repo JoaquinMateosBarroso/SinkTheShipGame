@@ -1,11 +1,7 @@
 #ifndef SINKTHESHIPSERVER_HPP
 #define SINKTHESHIPSERVER_HPP
 
-#include <sinkTheShip.hpp>
-#include <GameManager.hpp>
-#include <user.hpp>
-
-#include <GameManager.cpp> // I know this shouldn't be done, but I'm having problems with CMakeLists.txt
+#include <GameManager.cpp>
 
 struct SocketState {
     std::string user;
@@ -14,62 +10,32 @@ struct SocketState {
     int game;
     bool isYourTurn;
 };
-
-class Handlers {
+class Server {
+    private:
+        int _server_socket;
+        int _n_clients = 0;
+        struct sockaddr_in _server_addr;
+        struct sockaddr_in _client_addr;
+        socklen_t _addr_size;
+        int _clients[MAX_CLIENTS];
+        char _buffer[MSG_SIZE];
+        std::unordered_map<int, std::shared_ptr<SocketState>> _socket_states;
+        std::unordered_map<std::string, std::function<void(int, std::shared_ptr<SocketState>, char*, int)>> _controllers;
 
     public:
-        /**
-         * @brief Handle the register message "REGISTER -u <username> -p <password>"
-         * 
-         * @param socket 
-         * @param socketState
-         * @param buffer 
-         * @param bufferSize
-        */
-        void handleRegister(int socket, SocketState &socketState, char* buffer, int bufferSize);
-        
-        /**
-         * TODO
-         * @brief Handle the user message "USER <username>"
-        */
-        void handleUser(int socket, SocketState &socketState, char* buffer, int bufferSize);
-        /** 
-         * TODO
-         * @brief Handle the password message "PASSWORD <password>"
-        */
-        void handlePassword(int socket, SocketState &socketState, char* buffer, int bufferSize);
+        Server (int port);
 
-        /** 
-         * TODO
-         * @brief Handle the message "INICIO-JUEGO"
-        */
-        void handleStartGame(int socket, SocketState &socketState, char* buffer, int bufferSize);
+        int accept_connection();
 
-        /** 
-         * TODO
-         * @brief Handle the message "DISPATO <letra>, <numero>"
-        */
-        void handleShoot(int socket, SocketState &socketState, char* buffer, int bufferSize);
+        void start();
 
-        /** 
-         * TODO
-        */
-        void handleExit(int socket, SocketState &socketState, char* buffer, int bufferSize);
+        void exit_client(int socket, fd_set * readfds);
 
-    private:
-        bool isRegistered(const std::string &username);
+        void set_controller(std::string msg, std::function<void(int, std::shared_ptr<SocketState>, char*, int)> controller);
 
-        void registerUser(const std::string &username, const std::string &password);
+        void handleClientMsg(int socket, fd_set * readfds);
 
-        std::string getPassword(const std::string &user);
-
-        std::string getParam(const std::string& buffer, const std::string &option);
-
-
-        // Attributes
-        GameManager _gameManager;
+        std::string getFirstWord(const std::string& texto);
 };
-
-
 
 #endif

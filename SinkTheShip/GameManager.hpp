@@ -3,7 +3,7 @@
 
 #include <sinkTheShip.hpp>
 #include <sinkTheShip.cpp>
-
+#include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -15,9 +15,7 @@
 
 class GameManager {
 public:
-    GameManager() {
-        _waitingGame = -1;
-     }
+    
     /**
      * @brief Starts a game
      * @return -1 if game could not be reserved, otherwise returns the game id (position in the vector)
@@ -27,12 +25,20 @@ public:
     SinkTheShipServer& getGame(const int id) {
         return _games[id];
     }
+    static GameManager* getInstance() {
+        if (instance == nullptr) {
+        instance = new GameManager();
+        }
+        return instance;
+    }
 
 private:
     SinkTheShipServer _games[10];
     int _waitingGame;
-
-
+    GameManager() {
+        _waitingGame = -1;
+    }
+    static GameManager* instance;
 
     int lookForGame(const int socket, const std::string &username);
 };

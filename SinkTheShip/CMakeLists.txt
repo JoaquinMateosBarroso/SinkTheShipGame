@@ -9,5 +9,5 @@ include_directories(".")
 
 
 
-add_library(sinkTheShip sinkTheShip.cpp GameManager.cpp)
+add_library(sinkTheShip sinkTheShip.cpp GameManager.cpp Handlers.cpp)
 target_include_directories(sinkTheShip PUBLIC ${CMAKE_SOURCE_DIR}/SinkTheShip)
