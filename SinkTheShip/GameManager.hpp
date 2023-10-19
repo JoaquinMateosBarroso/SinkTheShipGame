@@ -17,7 +17,6 @@ public:
 
     GameManager() {
         _waitingGame = -1;
-        instance = nullptr;
     }
 
     /**
