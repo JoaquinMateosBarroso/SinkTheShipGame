@@ -1,4 +1,5 @@
 #include <GameManager.hpp>
+#include <cstring>
 
 
 
