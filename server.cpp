@@ -15,7 +15,7 @@
 int main() {
     Server server = Server(SERVER_PORT);
     server.set_controller("REGISTRO", &Handlers::handleRegister);
-    server.set_controller("USER", &Handlers::handleUser);
+    server.set_controller("USUARIO", &Handlers::handleUser);
     server.set_controller("INICIO-JUEGO", &Handlers::handleStartGame);
     server.start();
 
@@ -187,13 +187,13 @@ void Server::handleClientMsg(int socket, fd_set * readfds) {
     std::string keyword = getFirstWord(_buffer);
 
     std::shared_ptr<SocketState> ptr_state;
-    if (_socket_states.find(socket) != _socket_states.end()) {
+    if (_socket_states.find(socket) == _socket_states.end()) {
         ptr_state = std::make_shared<SocketState>();
         ptr_state -> game = -1;
         ptr_state -> isLogged = false;
         ptr_state -> isYourTurn = false;
-        ptr_state -> password = nullptr;
-        ptr_state -> user = nullptr;
+        ptr_state -> password = "";
+        ptr_state -> user = "";
         _socket_states[socket] = ptr_state; 
     }else
     {
@@ -203,7 +203,7 @@ void Server::handleClientMsg(int socket, fd_set * readfds) {
     bool keywordFound = (_controllers.find(keyword) != _controllers.end());
     if (!keywordFound)
     {
-        string sresponse = "--Err. Comando no reconocido";
+        string sresponse = "--Err. Comando no reconocido\n";
         const char* response = sresponse.c_str();
         send(socket, response, strlen(response), 0); cout << "Comando no reconocido" << endl;
         return;
