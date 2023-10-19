@@ -16,6 +16,7 @@ int main() {
     Server server = Server(SERVER_PORT);
     server.set_controller("REGISTRO", &Handlers::handleRegister);
     server.set_controller("USUARIO", &Handlers::handleUser);
+    server.set_controller("PASSWORD", &Handlers::handlePassword);
     server.set_controller("INICIO-JUEGO", &Handlers::handleStartGame);
     server.start();
 

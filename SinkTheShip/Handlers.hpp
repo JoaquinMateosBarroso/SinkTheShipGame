@@ -42,7 +42,7 @@ public:
      * TODO
      * @brief Handle the password message "PASSWORD <password>"
     */
-    static void handlePassword(int socket, SocketState &socketState, char* buffer, int bufferSize);
+    static void handlePassword(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize);
 
     /** 
      * TODO

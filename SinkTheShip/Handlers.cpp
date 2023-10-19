@@ -56,8 +56,25 @@ void Handlers::handleUser(int socket, std::shared_ptr<SocketState>socketState, c
     }
 
     socketState->user = username;
+    socketState->password = getPassword(username);
 
     const char* response = "+Ok. Usuario correcto";
+    send(socket, response, strlen(response), 0);
+}
+
+void Handlers::handlePassword(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize)
+{
+    std::string password = getParam(buffer, "PASSWORD");
+
+    if (password != socketState->password) {
+        const char* response = "–Err. Error en la validación";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    socketState -> isLogged = true;
+
+    const char* response = "+Ok. Usuario validado";
     send(socket, response, strlen(response), 0);
 }
 
@@ -104,8 +121,12 @@ std::string Handlers::getPassword(const std::string &user)
     std::string line;
     while (std::getline(usersFile, line)) {
         std::string sLine = std::string(line);
+        std::string userInLine = sLine.substr(0, sLine.find(" ")); 
         std::string aux = sLine.substr(sLine.find(" ")+1, sLine.length());
-        return aux;
+        if (user == userInLine)
+        {
+            return aux;
+        }
     }
 
     return "";
