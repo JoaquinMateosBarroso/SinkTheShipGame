@@ -108,13 +108,13 @@ void Server::start() {
                         FD_SET(client_socket, &readfds);
 
                         const char* response = "+Ok. Usuario conectado";
-                        send(client_socket, response, strlen(response), 0); cout << "send1" << endl;
+                        send(client_socket, response, strlen(response), 0);
                     }
                     else
                     {
                         bzero(_buffer, sizeof(_buffer));
                         strcpy(_buffer, "Demasiados clientes conectados");
-                        send(client_socket, _buffer, sizeof(_buffer), 0); cout << "send2" << endl;
+                        send(client_socket, _buffer, sizeof(_buffer), 0);
                         close(client_socket);
                     }
                 } else if (socket == STDIN_FILENO) { 
@@ -127,7 +127,7 @@ void Server::start() {
                         for (int j = 0; j < _n_clients; j++){
                             bzero(_buffer, sizeof(_buffer));
                             strcpy(_buffer, "Desconexión servidor"); 
-                            send(_clients[j], _buffer, sizeof(_buffer), 0);cout << "send3" << endl;
+                            send(_clients[j], _buffer, sizeof(_buffer), 0);
                             close(_clients[j]);
                             FD_CLR(_clients[j], &readfds);
                         }
@@ -205,12 +205,11 @@ void Server::handleClientMsg(int socket, fd_set * readfds) {
     {
         string sresponse = "--Err. Comando no reconocido\n";
         const char* response = sresponse.c_str();
-        send(socket, response, strlen(response), 0); cout << "Comando no reconocido" << endl;
+        send(socket, response, strlen(response), 0);
         return;
     }
 
     _controllers[keyword](socket, ptr_state, _buffer, (int)sizeof(_buffer));
-    cout << "Aquí llego";
 }
 
 std::string Server::getFirstWord(const std::string& texto) {

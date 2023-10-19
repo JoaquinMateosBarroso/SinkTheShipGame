@@ -15,18 +15,21 @@
 
 void Handlers::handleRegister(int socket, std::shared_ptr<SocketState>socketState, char* buffer, int bufferSize)
 {
+    std::string sbuffer = buffer;
+    sbuffer.erase(sbuffer.size());
+
     std::string username = getParam(buffer, "-u");
     std::string password = getParam(buffer, "-p");
 
     if (username == "" || password == "") {
         const char* response = "-Err. Usuario incorrecto";
-        send(socket, response, strlen(response), 0);
+        send(socket, response, strlen(response), 0); cout << username << "<" << password << ">" << endl;
         return;
     }
 
     if (isRegistered(username)) {
-        const char* response = "-Err. Usuario incorrecto";
-        send(socket, response, strlen(response), 0);
+        const char* response = "-Err. Usuario ya registrado";
+        send(socket, response, strlen(response), 0); cout << "2" << endl;
         return;
     }
 
@@ -114,9 +117,12 @@ std::string Handlers::getParam(const std::string& buffer, const std::string &opt
         return "";
     }
 
-    std::string::size_type pos2 = buffer.find(" ", pos + option.length() + 1);
+    std::string::size_type pos2 = buffer.find(" ", pos + option.length()+1);
     if (pos2 == std::string::npos) {
-        return "";
+        std::string::size_type pos3 = buffer.find("\0", pos + option.length()+1);
+        if (pos3 == std::string::npos) {
+            return "";
+        }
     }
 
     return buffer.substr(pos + option.length() + 1, pos2 - pos - option.length() - 1);

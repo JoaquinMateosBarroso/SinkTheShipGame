@@ -125,7 +125,6 @@ void Client::manageServerMessage()
 {
     bzero(_buffer, BUFFER_SIZE);
     recv(_socketDescriptor, _buffer, BUFFER_SIZE,0);
-    cout << _buffer;
     bool isError = manageError(_buffer);
 
     if (!isError)
@@ -151,7 +150,12 @@ bool Client::manageTerminalInput()
             fin = 1;
     }
 
-    send(_socketDescriptor, _buffer,sizeof(_buffer),0);
+    // Erase final \n
+    if (strlen(_buffer) >= 2)
+        _buffer[strlen(_buffer) - 1] = '\0';
+
+
+    send(_socketDescriptor, _buffer, sizeof(_buffer),0);
     
     return fin;
 }
@@ -182,7 +186,7 @@ bool Client::manageNonGameOk(string buffer)
 {
     if (_state == Connected)
     {
-        if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
+        if (!buffer.compare(0, 3, "+Ok")) // It is not +Ok
         {
             if(strcmp(_buffer,"Desconexión servidor") == 0){
                 cout << "El servidor se ha desconectado, salimos" << endl;
@@ -195,14 +199,10 @@ bool Client::manageNonGameOk(string buffer)
         bool startWaiting = !buffer.find("+Ok. Empezamos partida");
         if (startWaiting)
         {
-            cout << buffer << endl;
             _state = WaitingForGame;
+            return false;
         }
         bool gameBegins = !buffer.find("+Ok. Empezamos partida");
-        if (!gameBegins)
-        {
-            cout << buffer << endl;
-        }
         return gameBegins;
     }
     else if (_state == WaitingForGame)
@@ -214,10 +214,6 @@ bool Client::manageNonGameOk(string buffer)
         }
 
         bool gameBegins = !buffer.find("+Ok. Empezamos partida");
-        if (!gameBegins)
-        {
-            cout << buffer << endl;
-        }
         return gameBegins;
     }
     else
@@ -237,6 +233,7 @@ void Client::manageConnectedMessage()
     {
         _state = WaitingForGame;
     }
+    cout << _buffer << endl;
 }
 
 void Client::manageWaitingForGameMessage()
