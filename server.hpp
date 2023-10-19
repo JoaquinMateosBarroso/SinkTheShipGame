@@ -1,15 +1,19 @@
 #ifndef SINKTHESHIPSERVER_HPP
 #define SINKTHESHIPSERVER_HPP
 
-#include <GameManager.cpp>
+#include <GameManager.hpp>
+#include <Handlers.hpp>
+#include <unordered_map>
+#include <memory>
+#include <functional>
 
-struct SocketState {
-    std::string user;
-    std::string password;
-    bool isLogged;
-    int game;
-    bool isYourTurn;
-};
+// struct SocketState {
+//     std::string user;
+//     std::string password;
+//     bool isLogged;
+//     int game;
+//     bool isYourTurn;
+// };
 class Server {
     private:
         int _server_socket;

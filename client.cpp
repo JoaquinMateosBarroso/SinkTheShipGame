@@ -123,9 +123,9 @@ void Client::readMessage()
 
 void Client::manageServerMessage()
 {
-    bzero(_buffer, sizeof(_buffer));
-            recv(_socketDescriptor, _buffer, sizeof(_buffer),0);
-
+    bzero(_buffer, BUFFER_SIZE);
+    recv(_socketDescriptor, _buffer, BUFFER_SIZE,0);
+    cout << _buffer;
     bool isError = manageError(_buffer);
 
     if (!isError)
@@ -187,10 +187,9 @@ bool Client::manageNonGameOk(string buffer)
             if(strcmp(_buffer,"Desconexión servidor") == 0){
                 cout << "El servidor se ha desconectado, salimos" << endl;
                 close(_socketDescriptor);
-                exit(1);
+                exit(0);
             }
-            throw runtime_error(
-                "A not recognized code was received:\n"+buffer);
+            return false;
         }
 
         bool startWaiting = !buffer.find("+Ok. Empezamos partida");
@@ -233,8 +232,7 @@ bool Client::manageNonGameOk(string buffer)
 
 void Client::manageConnectedMessage()
 {
-    // TODO make logic for whether we start waiting in this turn
-    bool startWaiting = manageNonGameOk(_buffer);
+    bool startWaiting = manageNonGameOk(std::string(_buffer));
     if (startWaiting)
     {
         _state = WaitingForGame;

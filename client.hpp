@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#define BUFFER_SIZE 250
+
 using namespace std;
 
 
@@ -36,7 +38,7 @@ class Client {
     private:
         int _socketDescriptor;
 
-        char _buffer[250];
+        char _buffer[BUFFER_SIZE];
 
         fd_set _readfds, _auxfds;
 
@@ -58,6 +60,9 @@ class Client {
 
         void managePlayingMessage();
 
+        /**
+         * @return whether the game must begin
+        */
         bool manageNonGameOk(string buffer);
 };
 

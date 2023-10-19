@@ -2,6 +2,7 @@
 #include <cstring>
 
 
+GameManager* GameManager::instance = nullptr;
 
 int GameManager::startGame(const int socket, const std::string &username)
 {
@@ -48,4 +49,12 @@ int GameManager::lookForGame(const int socket, const std::string &username)
     else
         return -1;
 
+}
+
+
+GameManager* GameManager::getInstance() {
+    if (instance == nullptr) {
+        instance = new GameManager();
+    }
+    return instance;
 }

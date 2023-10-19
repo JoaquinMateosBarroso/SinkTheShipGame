@@ -7,9 +7,6 @@
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
-#include <unordered_map>
-#include <functional>
-#include <memory>
 
 
 #define SERVER_PORT 2007
@@ -98,7 +95,7 @@ void Server::start() {
         {
             if (FD_ISSET(socket, &auxfds))
             {
-                if (socket == _server_socket) { 
+                if (socket == _server_socket) {
 
                     int client_socket = accept_connection();
 
@@ -111,13 +108,13 @@ void Server::start() {
                         FD_SET(client_socket, &readfds);
 
                         const char* response = "+Ok. Usuario conectado";
-                        send(client_socket, response, strlen(response), 0);
+                        send(client_socket, response, strlen(response), 0); cout << "send1" << endl;
                     }
                     else
                     {
                         bzero(_buffer, sizeof(_buffer));
                         strcpy(_buffer, "Demasiados clientes conectados");
-                        send(client_socket, _buffer, sizeof(_buffer), 0);
+                        send(client_socket, _buffer, sizeof(_buffer), 0); cout << "send2" << endl;
                         close(client_socket);
                     }
                 } else if (socket == STDIN_FILENO) { 
@@ -130,7 +127,7 @@ void Server::start() {
                         for (int j = 0; j < _n_clients; j++){
                             bzero(_buffer, sizeof(_buffer));
                             strcpy(_buffer, "Desconexión servidor"); 
-                            send(_clients[j], _buffer, sizeof(_buffer), 0);
+                            send(_clients[j], _buffer, sizeof(_buffer), 0);cout << "send3" << endl;
                             close(_clients[j]);
                             FD_CLR(_clients[j], &readfds);
                         }
@@ -182,7 +179,7 @@ void Server::set_controller(std::string msg, std::function<void(int, std::shared
 }
 
 void Server::handleClientMsg(int socket, fd_set * readfds) {
-    if(strcmp(_buffer, "SALIR") == 0){
+    if(strcmp(_buffer, "SALIR\n") == 0){
         exit_client(socket, readfds);
         _socket_states.erase(socket);
         return;
@@ -203,7 +200,17 @@ void Server::handleClientMsg(int socket, fd_set * readfds) {
         ptr_state = _socket_states[socket];
     }
 
+    bool keywordFound = (_controllers.find(keyword) != _controllers.end());
+    if (!keywordFound)
+    {
+        string sresponse = "--Err. Comando no reconocido";
+        const char* response = sresponse.c_str();
+        send(socket, response, strlen(response), 0); cout << "Comando no reconocido" << endl;
+        return;
+    }
+
     _controllers[keyword](socket, ptr_state, _buffer, (int)sizeof(_buffer));
+    cout << "Aquí llego";
 }
 
 std::string Server::getFirstWord(const std::string& texto) {
