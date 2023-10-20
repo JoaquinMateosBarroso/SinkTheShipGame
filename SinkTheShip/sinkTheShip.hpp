@@ -34,6 +34,8 @@ class SinkTheShipServer {
         // @param board received from server, but cleaned 
         void start();
 
+        void createBoards();
+
         // @return Is the game started?
         bool isGameStarted() {
             return _started;
