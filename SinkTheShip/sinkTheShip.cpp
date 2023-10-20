@@ -8,6 +8,9 @@
 using namespace std;
 
 
+
+
+
 /********************************************************
  * SinkTheShipServer
 *********************************************************/
@@ -48,13 +51,9 @@ void SinkTheShipServer::closeGame(int socket)
 
 void SinkTheShipServer::start(){
     _started = true;
-    // crear boards
     const char* response = "+Ok. Turno de partida";
     send(_player1.socket, response, strlen(response), 0);
 }
-
-
-
 
 
 
