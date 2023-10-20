@@ -60,8 +60,8 @@ void SinkTheShipServer::createBoards()
 {
     srand(time(nullptr));
     // Initialize cells to water
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        for (int j = 0; j < MAX_CLIENTS; j++) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
             boardPlayer1[i][j] = Water;
             boardPlayer2[i][j] = Water;
         }
@@ -83,13 +83,13 @@ void SinkTheShipServer::createBoards()
 
 }
 
-void placeBoat(Cell board[MAX_CLIENTS][MAX_CLIENTS], int size) {
+void placeBoat(Cell board[BOARD_SIZE][BOARD_SIZE], int size) {
     int x, y, direction;
     
     do {
         // Randomly choose a position and direction
-        x = rand() % MAX_CLIENTS;
-        y = rand() % MAX_CLIENTS;
+        x = rand() % BOARD_SIZE;
+        y = rand() % BOARD_SIZE;
         direction = rand() % 2; // 0 for horizontal, 1 for vertical
     } while (!isValidPlacement(board, x, y, direction, size));
     
@@ -104,14 +104,14 @@ void placeBoat(Cell board[MAX_CLIENTS][MAX_CLIENTS], int size) {
 }
 
 // Function to check if a boat placement is valid
-bool isValidPlacement(Cell board[MAX_CLIENTS][MAX_CLIENTS], int x, int y, int direction, int size) {
+bool isValidPlacement(Cell board[BOARD_SIZE][BOARD_SIZE], int x, int y, int direction, int size) {
     if (direction == 0) {
-        if (y + size > MAX_CLIENTS) return false; // Out of bounds
+        if (y + size > BOARD_SIZE) return false; // Out of bounds
         for (int i = 0; i < size; i++) {
             if (board[x][y + i] != Water) return false; // Overlaps with existing boat
         }
     } else {
-        if (x + size > MAX_CLIENTS) return false; // Out of bounds
+        if (x + size > BOARD_SIZE) return false; // Out of bounds
         for (int i = 0; i < size; i++) {
             if (board[x + i][y] != Water) return false; // Overlaps with existing boat
         }
@@ -125,7 +125,20 @@ bool isValidPlacement(Cell board[MAX_CLIENTS][MAX_CLIENTS], int x, int y, int di
 std::string SinkTheShipServer::getStringBoard(int i)
 {
     //TODO
-    
+    std::string out;
+
+    auto board = (i==1? boardPlayer1: boardPlayer2);
+
+    for (int j = 0; j < BOARD_SIZE; j++)
+    {
+        for (int k = 0; k < BOARD_SIZE; k++)
+        {
+            out += getCellString(board[j][k]);
+        }
+        out += (j==(BOARD_SIZE-1)? ".": ";");
+    }
+
+    return out;
 }
 
 
@@ -225,6 +238,22 @@ void clearScreen() {
     system("clear");
 #endif
 }
+
+
+
+std::string getCellString(Cell cell)
+{
+    switch (cell) {
+        case Boat: return "B";
+        case Water: return "A";
+        case Floaded: return "H"; // Hundido
+        case Touched: return "T"; // Tocado
+        case Unkwown: return "D"; // Desconocido
+    }
+    return "Error";
+}
+
+
 
 
 

@@ -7,6 +7,8 @@
 #include <memory>
 #include <functional>
 
+#define MAX_CLIENTS 30
+
 // struct SocketState {
 //     std::string user;
 //     std::string password;
@@ -40,6 +42,9 @@ class Server {
         void handleClientMsg(int socket, fd_set * readfds);
 
         std::string getFirstWord(const std::string& texto);
+        
 };
+
+void handleFinish(int signal);
 
 #endif

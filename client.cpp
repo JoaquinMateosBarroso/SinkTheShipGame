@@ -184,72 +184,62 @@ bool manageError(string buffer)
 
 bool Client::manageNonGameOk(string buffer)
 {
-    if (_state == Connected)
+    bool gameBegins = false;
+    if (_state == Connected or _state == WaitingForGame)
     {
-        if (!buffer.compare(0, 3, "+Ok")) // It is not +Ok
-        {
-            if(strcmp(_buffer,"Desconexión servidor") == 0){
-                cout << "El servidor se ha desconectado, salimos" << endl;
-                close(_socketDescriptor);
-                exit(0);
+            if (buffer.find("+Ok") == string::npos) // It is not +Ok
+            {
+                if(strcmp(_buffer,"Desconexión servidor") == 0){
+                    cout << "El servidor se ha desconectado, salimos" << endl;
+                    close(_socketDescriptor);
+                }
+                return false;
             }
-            return false;
-        }
 
-        bool startWaiting = !buffer.find("+Ok. Empezamos partida");
-        if (startWaiting)
-        {
-            _state = WaitingForGame;
-            return false;
-        }
-        bool gameBegins = !buffer.find("+Ok. Empezamos partida");
-        return gameBegins;
+            gameBegins = (buffer.find("+Ok. Empezamos partida") != std::string::npos);
+            return gameBegins;
     }
-    else if (_state == WaitingForGame)
-    {
-        if (buffer.compare(0, 3, "+Ok")) // It is not +Ok
-        {
-            throw runtime_error(
-                "A not recognized code was received:\n"+buffer);
-        }
-
-        bool gameBegins = !buffer.find("+Ok. Empezamos partida");
-        return gameBegins;
-    }
-    else
-    {
-        perror("Part of code that should not be accesible");
-        exit(-1);
-    }
-
+        
+    perror("Part of code that should not be accesible");
+    exit(-1);
 }
 
 
 
 void Client::manageConnectedMessage()
 {
-    bool startWaiting = manageNonGameOk(std::string(_buffer));
-    if (startWaiting)
-    {
-        _state = WaitingForGame;
-    }
+    bool gameBegins = manageNonGameOk(std::string(_buffer));
     cout << _buffer << endl;
-}
-
-void Client::manageWaitingForGameMessage()
-{
-    bool gameBegins = manageNonGameOk(_buffer);
     if (gameBegins)
     {
-        _game.start(string(_buffer).substr(24), BOARD_SIZE);
+        _game.start(string(_buffer).substr(strlen("Ok. Empezamos partida")), BOARD_SIZE);
         _game.showBoard();
         _state = Playing;
     }
 }
 
+void Client::manageWaitingForGameMessage()
+{
+    bool gameBegins = manageNonGameOk(_buffer);
+    cout << _buffer << endl;
+    if (gameBegins)
+    {
+        _game.start(string(_buffer).substr(strlen("Ok. Empezamos partida")), BOARD_SIZE);
+        _game.showBoard();
+        _state = Playing; cout << "Empezamos" << endl;
+    }
+}
+
 void Client::managePlayingMessage()
 {
-    // TODO make logic for whether the game ends in this turn
-    _game.playTurn(_buffer);
-    _game.showBoard();
+    string sbuffer = _buffer; cout << _buffer << "estamos aquí " << endl;
+    if (sbuffer.find("-Err") != string::npos or sbuffer.find("Turno de partida") != string::npos)
+        cout << _buffer << endl;
+    else
+    {
+        // TODO make logic for whether the game ends in this turn
+        _game.playTurn(_buffer);
+        _game.showBoard();
+
+    }
 }

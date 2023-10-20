@@ -4,7 +4,8 @@
 #include <iostream>
 #include <vector>
 
-#define MAX_CLIENTS 10
+#define MAX_GAMES 10
+#define BOARD_SIZE 10
 #define MSG_SIZE 250
 
 #define BARCOS_4CUADRADOS 1
@@ -67,8 +68,8 @@ class SinkTheShipServer {
         bool _free;
 
     private:
-        Cell boardPlayer1[MAX_CLIENTS][MAX_CLIENTS];
-        Cell boardPlayer2[MAX_CLIENTS][MAX_CLIENTS];
+        Cell boardPlayer1[BOARD_SIZE][BOARD_SIZE];
+        Cell boardPlayer2[BOARD_SIZE][BOARD_SIZE];
 };
 
 
@@ -131,6 +132,8 @@ void clearScreen();
 
 
 
-bool isValidPlacement(Cell board[MAX_CLIENTS][MAX_CLIENTS], int x, int y, int direction, int size);
+bool isValidPlacement(Cell board[BOARD_SIZE][BOARD_SIZE], int x, int y, int direction, int size);
 
-void placeBoat(Cell board[MAX_CLIENTS][MAX_CLIENTS], int size);
+void placeBoat(Cell board[BOARD_SIZE][BOARD_SIZE], int size);
+
+std::string getCellString(Cell cell);

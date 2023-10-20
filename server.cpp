@@ -17,7 +17,8 @@ int main() {
     server.set_controller("REGISTRO", &Handlers::handleRegister);
     server.set_controller("USUARIO", &Handlers::handleUser);
     server.set_controller("PASSWORD", &Handlers::handlePassword);
-    server.set_controller("INICIO-JUEGO", &Handlers::handleStartGame);
+    server.set_controller("INICIAR-PARTIDA", &Handlers::handleStartGame);
+
     server.start();
 
     return 0;
@@ -124,7 +125,7 @@ void Server::start() {
                     bzero(_buffer, sizeof(_buffer));
                     fgets(_buffer, sizeof(_buffer),stdin);
                     
-                    if(strcmp(_buffer, "SALIR") == 0){
+                    if(strcmp(_buffer, "SALIR\n") == 0){
                         for (int j = 0; j < _n_clients; j++){
                             bzero(_buffer, sizeof(_buffer));
                             strcpy(_buffer, "Desconexión servidor"); 
@@ -133,7 +134,7 @@ void Server::start() {
                             FD_CLR(_clients[j], &readfds);
                         }
                         close(_server_socket);
-                        exit(-1);
+                        exit(0);
                     }
                 } else {
                     bzero(_buffer,sizeof(_buffer));
@@ -234,3 +235,6 @@ std::string Server::getFirstWord(const std::string& texto) {
     iss >> primeraPalabra;
     return primeraPalabra;
 }
+
+
+

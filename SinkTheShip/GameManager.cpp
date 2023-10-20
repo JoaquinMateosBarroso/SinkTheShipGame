@@ -15,14 +15,17 @@ int GameManager::startGame(const int socket, const std::string &username)
     }
     else if (_games[_waitingGame].addPlayer(socket, username))
     {
-        _games[_waitingGame].createBoards();
+        _games[_waitingGame].createBoards(); cout << _games[_waitingGame].getStringBoard(1);
         std::string response1 = "+Ok. Empezamos partida." + _games[_waitingGame].getStringBoard(1);
         std::string response2 = "+Ok. Empezamos partida." + _games[_waitingGame].getStringBoard(2);
         send(socket, response1.c_str(), response1.length(), 0);
         send(_games[_waitingGame].getPlayer(1).socket, response2.c_str(), response2.length(), 0);
         _games[_waitingGame].start();
 
-        return _waitingGame;
+        int aux = _waitingGame;
+        _waitingGame = -1;
+
+        return aux;
     }
     else
     {
