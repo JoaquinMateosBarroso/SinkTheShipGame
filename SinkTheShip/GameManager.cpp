@@ -18,6 +18,7 @@ int GameManager::startGame(const int socket, const std::string &username)
         const char* response = "+Ok. Empieza la partida";
         send(socket, response, strlen(response), 0);
         send(_games[_waitingGame].getPlayer(1).socket, response, strlen(response), 0);
+        _games[_waitingGame].start();
 
         return _waitingGame;
     }
@@ -32,16 +33,13 @@ int GameManager::startGame(const int socket, const std::string &username)
 
 int GameManager::lookForGame(const int socket, const std::string &username)
 {
-    _waitingGame = 0;
-    while (_games[_waitingGame].isGameStarted() and _waitingGame < 10)
-    {
-        _waitingGame++;
-    }
+    for (_waitingGame = 0; (_waitingGame < 10) and (!_games[_waitingGame].isGameFree()); _waitingGame++)
+    {}
 
     if (_waitingGame == 10)
     {
         _waitingGame = -1;
-        send(socket, "-Err. No games avaiable", MSG_SIZE, 0);
+        send(socket, "-Err. No hay juegos disponibles", MSG_SIZE, 0);
         return -1;
     }
     else if (_games[_waitingGame].addPlayer(socket, username))

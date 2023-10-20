@@ -13,6 +13,24 @@
 
 
 
+void Handlers::handleExit(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize) {
+    GameManager * gameManager = GameManager::getInstance();
+
+    if (socketState -> game != -1)
+    {
+        SinkTheShipServer game = gameManager -> getGame(socketState -> game);
+        if (!game.isGameStarted())
+        {
+            game._free = true;
+            gameManager->_waitingGame = -1;
+            game._player1.socket = -1;
+        }else {
+            game.closeGame(socket);
+        }
+        
+    }
+}
+
 void Handlers::handleRegister(int socket, std::shared_ptr<SocketState>socketState, char* buffer, int bufferSize)
 {
     std::string sbuffer = buffer;

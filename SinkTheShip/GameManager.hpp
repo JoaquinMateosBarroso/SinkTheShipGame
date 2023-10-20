@@ -25,14 +25,15 @@ public:
     */
     int startGame(const int socket, const std::string &username);
 
+
     SinkTheShipServer& getGame(const int id) {
         return _games[id];
     }
     static GameManager* getInstance();
 
+    int _waitingGame;
 private:
     SinkTheShipServer _games[10];
-    int _waitingGame;
     static GameManager* instance;  
 
     int lookForGame(const int socket, const std::string &username);

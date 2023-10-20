@@ -1,6 +1,9 @@
 #include <sinkTheShip.hpp>
 
 #include <sstream>
+#include <string>
+#include <cstring>
+#include <sys/socket.h>
 
 using namespace std;
 
@@ -16,19 +19,26 @@ bool SinkTheShipServer::addPlayer(const int socket, const string &username) {
         _player1.username = username;
         _free = false;
         return true;
-    } else if (_started) {
+    } else if (!_started) {
         _player2.socket = socket;
         _player2.username = username;
+        _started = true;
+        return true;
     }
     return false;
 }
 
-void SinkTheShipServer::closeGame()
+void SinkTheShipServer::closeGame(int socket)
 {
-    // TODO
+    if (_player1.socket != -1)
+    {
+        //string sresponse = "La partida ha finalizado\n";
+        //const char* response = sresponse.c_str();
+        //send(socket, response, strlen(response), 0);
+    }
+    
 
 
-    //
     _started = false;
     _free = true;
 }
@@ -36,6 +46,12 @@ void SinkTheShipServer::closeGame()
 
 
 
+void SinkTheShipServer::start(){
+    _started = true;
+    // crear boards
+    const char* response = "+Ok. Turno de partida";
+    send(_player1.socket, response, strlen(response), 0);
+}
 
 
 

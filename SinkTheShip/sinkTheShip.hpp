@@ -18,8 +18,8 @@ enum Cell {
 };
 
 struct Player {
-int socket;
-string username;
+    int socket = -1;
+    string username = "";
 };
 
 
@@ -32,7 +32,7 @@ class SinkTheShipServer {
 
         // Gets the object prepared for a game with a new board
         // @param board received from server, but cleaned 
-        void start(const string &board, const int boardSize);
+        void start();
 
         // @return Is the game started?
         bool isGameStarted() {
@@ -44,7 +44,7 @@ class SinkTheShipServer {
             return _free;
         }
 
-        void closeGame();
+        void closeGame(int socket);
 
         // @return Could the player be added to a game?
         bool addPlayer(const int socket, const string &username);
@@ -53,13 +53,13 @@ class SinkTheShipServer {
             return (id==1)? _player1: _player2;
         }
 
-    private:
-
-
         Player _player1;
         Player _player2;
         bool _started;
         bool _free;
+    private:
+
+
 
         Cell boardPlayer1[MAX_CLIENTS][MAX_CLIENTS];
         Cell boardPlayer2[MAX_CLIENTS][MAX_CLIENTS];
