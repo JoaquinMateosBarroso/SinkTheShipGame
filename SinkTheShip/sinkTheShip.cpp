@@ -56,6 +56,87 @@ void SinkTheShipServer::start(){
 }
 
 
+void SinkTheShipServer::createBoards()
+{
+    srand(time(nullptr));
+    // Initialize cells to water
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        for (int j = 0; j < MAX_CLIENTS; j++) {
+            boardPlayer1[i][j] = Water;
+            boardPlayer2[i][j] = Water;
+        }
+    }
+
+    // Place boats randomly on both boards
+    placeBoat(boardPlayer1, 4);
+    placeBoat(boardPlayer1, 3);
+    placeBoat(boardPlayer1, 3);
+    placeBoat(boardPlayer1, 2);
+    placeBoat(boardPlayer1, 2);
+    
+    placeBoat(boardPlayer2, 4);
+    placeBoat(boardPlayer2, 3);
+    placeBoat(boardPlayer2, 3);
+    placeBoat(boardPlayer2, 2);
+    placeBoat(boardPlayer2, 2);
+    
+
+}
+
+void placeBoat(Cell board[MAX_CLIENTS][MAX_CLIENTS], int size) {
+    int x, y, direction;
+    
+    do {
+        // Randomly choose a position and direction
+        x = rand() % MAX_CLIENTS;
+        y = rand() % MAX_CLIENTS;
+        direction = rand() % 2; // 0 for horizontal, 1 for vertical
+    } while (!isValidPlacement(board, x, y, direction, size));
+    
+    // Place the boat on the board
+    for (int i = 0; i < size; i++) {
+        if (direction == 0) {
+            board[x][y + i] = Boat;
+        } else {
+            board[x + i][y] = Boat;
+        }
+    }
+}
+
+// Function to check if a boat placement is valid
+bool isValidPlacement(Cell board[MAX_CLIENTS][MAX_CLIENTS], int x, int y, int direction, int size) {
+    if (direction == 0) {
+        if (y + size > MAX_CLIENTS) return false; // Out of bounds
+        for (int i = 0; i < size; i++) {
+            if (board[x][y + i] != Water) return false; // Overlaps with existing boat
+        }
+    } else {
+        if (x + size > MAX_CLIENTS) return false; // Out of bounds
+        for (int i = 0; i < size; i++) {
+            if (board[x + i][y] != Water) return false; // Overlaps with existing boat
+        }
+    }
+    return true;
+}
+
+
+
+
+std::string SinkTheShipServer::getStringBoard(int i)
+{
+    //TODO
+    
+}
+
+
+
+
+
+
+
+
+
+
 
 /***********************************************************
  * SinkTheShipClient  

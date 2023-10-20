@@ -65,10 +65,8 @@ class SinkTheShipServer {
         Player _player2;
         bool _started;
         bool _free;
+
     private:
-
-
-
         Cell boardPlayer1[MAX_CLIENTS][MAX_CLIENTS];
         Cell boardPlayer2[MAX_CLIENTS][MAX_CLIENTS];
 };
@@ -123,3 +121,16 @@ class SinkTheShipClient {
 void clearScreen();
 
 #endif
+
+
+
+
+
+
+
+
+
+
+bool isValidPlacement(Cell board[MAX_CLIENTS][MAX_CLIENTS], int x, int y, int direction, int size);
+
+void placeBoat(Cell board[MAX_CLIENTS][MAX_CLIENTS], int size);
