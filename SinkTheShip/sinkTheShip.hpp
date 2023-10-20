@@ -38,6 +38,10 @@ class SinkTheShipServer {
         // @param board received from server, but cleaned 
         void start();
 
+        void createBoards();
+
+        std::string getStringBoard(int i);
+
         // @return Is the game started?
         bool isGameStarted() {
             return _started;

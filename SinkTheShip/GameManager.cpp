@@ -15,7 +15,8 @@ int GameManager::startGame(const int socket, const std::string &username)
     }
     else if (_games[_waitingGame].addPlayer(socket, username))
     {
-        const char* response = "+Ok. Empieza la partida";
+        _games[_waitingGame].createBoards();
+        const char* response = "+Ok. Empezamos partida." + ;
         send(socket, response, strlen(response), 0);
         send(_games[_waitingGame].getPlayer(1).socket, response, strlen(response), 0);
         _games[_waitingGame].start();
