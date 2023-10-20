@@ -7,6 +7,10 @@
 #define MAX_CLIENTS 10
 #define MSG_SIZE 250
 
+#define BARCOS_4CUADRADOS 1
+#define BARCOS_3CUADRADOS 2
+#define BARCOS_2CUADRADOS 2
+
 using namespace std;
 
 enum Cell {
