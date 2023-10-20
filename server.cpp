@@ -156,7 +156,23 @@ void Server::start() {
                 
 }
 
-void Server::exit_client(int socket, fd_set * readfds){    
+void Server::exit_client(int socket, fd_set * readfds){
+    std::shared_ptr<SocketState> ptr_state;
+    if (_socket_states.find(socket) == _socket_states.end()) {
+        ptr_state = std::make_shared<SocketState>();
+        ptr_state -> game = -1;
+        ptr_state -> isLogged = false;
+        ptr_state -> isYourTurn = false;
+        ptr_state -> password = "";
+        ptr_state -> user = "";
+        _socket_states[socket] = ptr_state; 
+    }else
+    {
+        ptr_state = _socket_states[socket];
+    }
+
+    Handlers::handleExit(socket, ptr_state, _buffer, (int)sizeof(_buffer));
+
     close(socket);
     FD_CLR(socket,readfds);
     
@@ -172,7 +188,6 @@ void Server::exit_client(int socket, fd_set * readfds){
 
     std::cout << "El socket " << socket << " se ha desconectado." << std::endl;
 
-    // Doing something when a client exits
 }
 
 void Server::set_controller(std::string msg, std::function<void(int, std::shared_ptr<SocketState>, char*, int)> controller) {

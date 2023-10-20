@@ -54,12 +54,12 @@ public:
      * TODO
      * @brief Handle the message "DISPATO <letra>, <numero>"
     */
-    static void handleShoot(int socket, SocketState &socketState, char* buffer, int bufferSize);
+    static void handleShoot(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize);
 
     /** 
      * TODO
     */
-    static void handleExit(int socket, SocketState &socketState, char* buffer, int bufferSize);
+    static void handleExit(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize);
 };
 
 
