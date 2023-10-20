@@ -23,13 +23,13 @@ void Handlers::handleRegister(int socket, std::shared_ptr<SocketState>socketStat
 
     if (username == "" || password == "") {
         const char* response = "-Err. Usuario incorrecto";
-        send(socket, response, strlen(response), 0); cout << username << "<" << password << ">" << endl;
+        send(socket, response, strlen(response), 0);
         return;
     }
 
     if (isRegistered(username)) {
         const char* response = "-Err. Usuario ya registrado";
-        send(socket, response, strlen(response), 0); cout << "2" << endl;
+        send(socket, response, strlen(response), 0);
         return;
     }
 

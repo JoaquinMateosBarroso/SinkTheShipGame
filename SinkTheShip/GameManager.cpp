@@ -9,6 +9,8 @@ int GameManager::startGame(const int socket, const std::string &username)
     // 
     if (_waitingGame == -1)
     {
+        const char* response = "+Ok. Esperando jugadores";
+        send(socket, response, strlen(response), 0);
         return lookForGame(socket, username);
     }
     else if (_games[_waitingGame].addPlayer(socket, username))
