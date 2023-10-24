@@ -346,6 +346,7 @@ void SinkTheShipClient::showBoard(const string &buffer)
                 case Water: cout << 'A'; break;
                 case Touched: cout << 'T'; break;
                 case Floaded: cout << 'H'; break;
+                case Unkwown: cout << 'U'; break;
                 default: throw runtime_error("Not allowed cell");
             }
             cout << ' ';

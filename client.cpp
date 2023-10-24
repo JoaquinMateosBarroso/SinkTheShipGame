@@ -236,6 +236,12 @@ void Client::managePlayingMessage()
 {
     string sbuffer = _buffer; 
     cout << _buffer << endl;
+    if (sbuffer.find("Tu oponente ha terminado la partida") != string::npos)
+    {
+        _state = Connected;
+        return;
+    }
+    
     if (sbuffer.find("-Err") != string::npos or sbuffer.find("Turno de partida") != string::npos)
         cout << _buffer << endl;
     else
