@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <Handlers.hpp>
 #include <memory>
 
 #define MAX_GAMES 10

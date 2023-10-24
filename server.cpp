@@ -18,6 +18,7 @@ int main() {
     server.set_controller("USUARIO", &Handlers::handleUser);
     server.set_controller("PASSWORD", &Handlers::handlePassword);
     server.set_controller("INICIAR-PARTIDA", &Handlers::handleStartGame);
+    server.set_controller("DISPARO", &Handlers::handleShoot);
 
     server.start();
 

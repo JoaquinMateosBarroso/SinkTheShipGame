@@ -23,7 +23,7 @@ public:
      * @brief Starts a game
      * @return -1 if game could not be reserved, otherwise returns the game id (position in the vector)
     */
-    int startGame(const int socket, const std::string &username);
+    int startGame(const int socket, std::shared_ptr<SocketState> socketState);
 
 
     SinkTheShipServer& getGame(const int id) {
@@ -36,7 +36,7 @@ private:
     SinkTheShipServer _games[10];
     static GameManager* instance;  
 
-    int lookForGame(const int socket, const std::string &username);
+    int lookForGame(const int socket, std::shared_ptr<SocketState> socketState);
 };
 
 

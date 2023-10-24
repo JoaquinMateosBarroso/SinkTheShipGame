@@ -45,16 +45,28 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
         const char* response = string("+Ok. TOCADO: " + to_string(letter) + "," + to_string(row)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
 
-        const char* response = "+Ok. Turno de partida";
+        response = "+Ok. Turno de partida";
         send(playerWhoShoot.socket, response, strlen(response), 0);
     }else if (shootedCell == Cell::Touched)
     {
         shootedBoard[col][row] = Cell::Floaded;
-        const char* response = string("+Ok. Hundido: " + to_string(letter) + "," + to_string(row)).c_str();
+        const char* response = string("+Ok. HUNDIDO: " + to_string(letter) + "," + to_string(row)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
-        const char* response = "+Ok. Turno de partida";
+        
+        response = "+Ok. Turno de partida";
         send(playerWhoShoot.socket, response, strlen(response), 0);
+    } else if (shootedCell == Cell::Water)
+    {
+        const char* response = string("+Ok. AGUA: " + to_string(letter) + "," + to_string(row)).c_str();
+        send(playerWhoShoot.socket, response, strlen(response), 0);
+        
+        playerWhoIsShooted.socketState -> isYourTurn = true;
+        playerWhoShoot.socketState -> isYourTurn = false;
+
+        response = "+Ok. Turno de partida";
+        send(playerWhoIsShooted.socket, response, strlen(response), 0);
     }
+    
     
     
 
@@ -236,7 +248,9 @@ void SinkTheShipClient::start(const string &board, const int boardSize)
 
 
 
-
+int SinkTheShipClient::cellPosinChar2Int(const char c) {
+    return c - 'A';
+}
 
 // Plays a turn
 // @param buffer received from server

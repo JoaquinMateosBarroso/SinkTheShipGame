@@ -30,6 +30,47 @@ void Handlers::handleExit(int socket, std::shared_ptr<SocketState> socketState, 
         
     }
 }
+int Handlers::letterToColumn(char letter) {
+    return letter - 'A';
+}
+
+void Handlers::handleShoot(int socket, std::shared_ptr<SocketState> socketState, char* buffer, int bufferSize) {
+    if (!socketState->isLogged) {
+        const char* response = "-Err. Usuario no logueado";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    if (socketState->game == -1) {
+        const char* response = "-Err. El usuario no está en partida";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+    if (!socketState->isYourTurn) {
+        const char* response = "-Err. Debe esperar su turno";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+
+
+    char letter = buffer[8];
+    int col = letterToColumn(letter);
+    int row = stoi(string(buffer).substr(10));
+
+    if (col > 10 or row > 10 or col < 0 or row < 0)
+    {
+        const char* response = "-Err. Las coordenadas dadas no son correctas";
+        send(socket, response, strlen(response), 0);
+        return;
+    }
+    
+    GameManager* gameManager = GameManager::getInstance();
+
+    SinkTheShipServer game = gameManager -> getGame(socketState -> game);
+
+    game.shoot(socket, col, row);
+}
 
 void Handlers::handleRegister(int socket, std::shared_ptr<SocketState>socketState, char* buffer, int bufferSize)
 {
@@ -106,7 +147,7 @@ void Handlers::handleStartGame(int socket, std::shared_ptr<SocketState>socketSta
     
     GameManager* gameManager = GameManager::getInstance();
 
-    socketState->game = gameManager -> startGame(socket, socketState->user);
+    socketState->game = gameManager -> startGame(socket, socketState);
 
 }
 

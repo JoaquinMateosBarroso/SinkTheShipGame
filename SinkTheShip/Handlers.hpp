@@ -7,14 +7,16 @@
 struct SocketState {
     std::string user;
     std::string password;
-    bool isLogged;
-    int game;
-    bool isYourTurn;
+    bool isLogged=false;
+    int game=-1;
+    bool isYourTurn=false;
 };
 
 class Handlers
 {
 private:
+    static int letterToColumn(char letter);
+
     static bool isRegistered(const std::string &username);
 
     static void registerUser(const std::string &username, const std::string &password);
