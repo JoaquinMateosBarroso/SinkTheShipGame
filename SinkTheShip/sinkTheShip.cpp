@@ -118,6 +118,7 @@ void SinkTheShipServer::closeGame(int socket)
 void SinkTheShipServer::start(){
     _started = true;
     const char* response = "+Ok. Turno de partida";
+    _player1.socketState -> isYourTurn = true;
     send(_player1.socket, response, strlen(response), 0);
 }
 
