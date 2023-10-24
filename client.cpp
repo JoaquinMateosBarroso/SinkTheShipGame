@@ -234,8 +234,7 @@ void Client::manageWaitingForGameMessage()
 
 void Client::managePlayingMessage()
 {
-    string sbuffer = _buffer; 
-    cout << _buffer << endl;
+    string sbuffer = _buffer;
     if (sbuffer.find("Tu oponente ha terminado la partida") != string::npos)
     {
         _state = Connected;

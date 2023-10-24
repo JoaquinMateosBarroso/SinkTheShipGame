@@ -56,9 +56,10 @@ void Handlers::handleShoot(int socket, std::shared_ptr<SocketState> socketState,
 
     char letter = buffer[8];
     int col = letterToColumn(letter);
-    int row = stoi(string(buffer).substr(10));
+    cout << "letter" << letter << col << endl; 
+    int row = stoi(string(buffer).substr(10))-1;
 
-    if (col > 10 or row > 10 or col < 0 or row < 0)
+    if (col > 9 or row > 9 or col < 0 or row < 0)
     {
         const char* response = "-Err. Las coordenadas dadas no son correctas";
         send(socket, response, strlen(response), 0);

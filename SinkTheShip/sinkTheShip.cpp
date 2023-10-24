@@ -33,32 +33,32 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
         shootedBoard = boardPlayer1;
     }
     
-    char letter = 'A' - 1 + col;
-    const char* response = string("+Ok. Disparo en " + to_string(letter) + "," + to_string(row)).c_str();
-    send(playerWhoIsShooted.socket, response, strlen(response), 0);
+    char letter = 'A' + col;
+    string responseSTR = string("+Ok. Disparo en: ") + letter + "," + to_string(row+1);
+    const char* response = responseSTR.c_str();
+    send(playerWhoIsShooted.socket, response, strlen(response), 0); 
 
-    Cell shootedCell = shootedBoard[col][row];
+    Cell shootedCell = shootedBoard[col][row+1];
 
     if (shootedCell == Cell::Boat)
     {
-        shootedBoard[col][row] = Cell::Touched;
-        const char* response = string("+Ok. TOCADO: " + to_string(letter) + "," + to_string(row)).c_str();
+        shootedBoard[col][row+1] = Cell::Touched;
+        const char* response = string(string("+Ok. TOCADO: ") + letter + "," + to_string(row+1)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
 
         response = "+Ok. Turno de partida";
         send(playerWhoShoot.socket, response, strlen(response), 0);
     }else if (shootedCell == Cell::Touched)
     {
-        shootedBoard[col][row] = Cell::Floaded;
-        const char* response = string("+Ok. HUNDIDO: " + to_string(letter) + "," + to_string(row)).c_str();
+        shootedBoard[col][row+1] = Cell::Floaded;
+        const char* response = string(string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
         
         response = "+Ok. Turno de partida";
         send(playerWhoShoot.socket, response, strlen(response), 0);
     } else if (shootedCell == Cell::Water)
     {
-        const char* response = string(std::string("+Ok. AGUA: " + letter) +
-                                      "," + to_string(row)).c_str();
+        const char* response = string(std::string("+Ok. AGUA: ") + letter + "," + to_string(row+1)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
         
         playerWhoIsShooted.socketState -> isYourTurn = true;
@@ -67,7 +67,6 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
         response = "+Ok. Turno de partida";
         send(playerWhoIsShooted.socket, response, strlen(response), 0);
     }
-    
     
     
 
@@ -258,42 +257,47 @@ int SinkTheShipClient::cellPosinChar2Int(const char c) {
 // @param buffer received from server
 void SinkTheShipClient::playTurn(const std::string &buffer)
 {
-    int pos;
+    size_t pos;
     int x;
     char y;
-    cout << buffer << endl;
     if ((pos=buffer.find("AGUA: ")) != string::npos)
     {
         pos += strlen("AGUA: ");
         y = buffer[pos];
-        x = stoi(buffer.substr(pos+2));
-        _opponentBoard[cellPosinChar2Int(y)][x] = Water;
+        x = stoi(buffer.substr(pos+2))-1;
+        _opponentBoard[x][cellPosinChar2Int(y)] = Water;
         showBoard(buffer);
         cout << "Agua" << endl;
     } else if ((pos=buffer.find("TOCADO: ")) != string::npos)
     {
         pos += strlen("TOCADO: ");
         y = buffer[pos];
-        x = stoi(buffer.substr(pos+2));
-        _opponentBoard[cellPosinChar2Int(y)][x] = Touched;
+        x = stoi(buffer.substr(pos+2))-1;
+        _opponentBoard[x][cellPosinChar2Int(y)] = Touched;
         showBoard(buffer);
         cout << "Tocado" << endl;
     } else if ((pos=buffer.find("HUNDIDO: ")) != string::npos)
     {
         pos += strlen("HUNDIDO: ");
         y = buffer[pos];
-        x = stoi(buffer.substr(pos+2));
-        _opponentBoard[cellPosinChar2Int(y)][x] = Floaded;
+        x = stoi(buffer.substr(pos+2))-1;
+        _opponentBoard[x][cellPosinChar2Int(y)] = Floaded;
         showBoard(buffer);
         cout << "Hundido" << endl;
-    } else if (buffer.find("Disparo en:"))
-    {
-        pos += strlen("HUNDIDO: ");
+    } else if ((pos=buffer.find("Disparo en: ")) != string::npos)
+    { cout << buffer[pos] <<"pepito"<< buffer[pos+2] <<endl;
+        pos += strlen("Disparo en: ");
         y = buffer[pos];
-        x = stoi(buffer.substr(pos+2));
-        _opponentBoard[cellPosinChar2Int(y)][x] = Floaded;
+        x = stoi(buffer.substr(pos+2))-1;
+        bool touched = _opponentBoard[x][cellPosinChar2Int(y)]==Boat;
+        if (touched)
+            _opponentBoard[x][cellPosinChar2Int(y)] = Touched;
         showBoard(buffer);
-        cout << "El oponente ha disparado en " << y << x << endl;
+        cout << "El oponente ha disparado en " << y << x+1;
+        if (touched)
+            cout << ". Ha tocado barco" << endl;
+        else
+            cout << ". Ha tocado agua" << endl;
     } else {
         cout << buffer << endl;
     }
@@ -312,6 +316,7 @@ void SinkTheShipClient::showBoard(const string &buffer)
     cout << "********* MY BOARD *********" << endl << endl;
 
     cout << "   A B C D E F G H I J" << endl;
+    cout << "   -------------------" << endl;
     int index=1;
     for (auto row: _myBoard)
     {
@@ -349,7 +354,7 @@ void SinkTheShipClient::showBoard(const string &buffer)
                 case Water: cout << 'A'; break;
                 case Touched: cout << 'T'; break;
                 case Floaded: cout << 'H'; break;
-                case Unkwown: cout << 'U'; break;
+                case Unkwown: cout << 'D'; break;
                 default: throw runtime_error("Not allowed cell");
             }
             cout << ' ';
@@ -363,13 +368,9 @@ void SinkTheShipClient::showBoard(const string &buffer)
 
 
 
-
-
-
-
-
     if (buffer.find("Turno de partida") != string::npos)
         cout << "Es tu turno. Introduce el comando a ejecutar:" << endl;
+
 
 }
 
