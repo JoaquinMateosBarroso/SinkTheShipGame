@@ -57,7 +57,8 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
         send(playerWhoShoot.socket, response, strlen(response), 0);
     } else if (shootedCell == Cell::Water)
     {
-        const char* response = string("+Ok. AGUA: " + to_string(letter) + "," + to_string(row)).c_str();
+        const char* response = string(std::string("+Ok. AGUA: " + letter) +
+                                      "," + to_string(row)).c_str();
         send(playerWhoShoot.socket, response, strlen(response), 0);
         
         playerWhoIsShooted.socketState -> isYourTurn = true;
@@ -260,6 +261,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
     int pos;
     int x;
     char y;
+    cout << buffer << endl;
     if ((pos=buffer.find("AGUA: ")) != string::npos)
     {
         pos += strlen("AGUA: ");
