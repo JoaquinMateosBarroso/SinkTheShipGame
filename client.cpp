@@ -240,7 +240,6 @@ void Client::managePlayingMessage()
         cout << _buffer << endl;
     else
     {
-        // TODO make logic for whether the game ends in this turn
         _game.playTurn(_buffer);
 
     }

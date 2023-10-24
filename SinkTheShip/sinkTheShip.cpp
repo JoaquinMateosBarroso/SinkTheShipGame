@@ -223,6 +223,8 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
         _opponentBoard[cellPosinChar2Int(y)][x] = Floaded;
         showBoard(buffer);
         cout << "El oponente ha disparado en " << y << x << endl;
+    } else {
+        cout << buffer << endl;
     }
 
 
