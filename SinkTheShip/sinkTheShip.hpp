@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #define MAX_GAMES 10
 #define BOARD_SIZE 10
@@ -25,6 +26,7 @@ enum Cell {
 struct Player {
     int socket = -1;
     string username = "";
+    std::shared_ptr<SocketState> socketState;
 };
 
 
@@ -56,14 +58,17 @@ class SinkTheShipServer {
         void closeGame(int socket);
 
         // @return Could the player be added to a game?
-        bool addPlayer(const int socket, const string &username);
+        bool addPlayer(const int socket, std::shared_ptr<SocketState> socketState);
 
         Player& getPlayer(const int id) {
             return (id==1)? _player1: _player2;
         }
 
+        void shoot(int socket, int col, int row);
+
         Player _player1;
         Player _player2;
+        int _turn;
         bool _started;
         bool _free;
 

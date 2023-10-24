@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <sys/socket.h>
+#include <Handlers.hpp>
 
 using namespace std;
 
@@ -15,16 +16,62 @@ using namespace std;
  * SinkTheShipServer
 *********************************************************/
 
+void SinkTheShipServer::shoot(int socket, int col, int row) {
+    Player playerWhoShoot;
+    Player playerWhoIsShooted;
+    Cell (*shootedBoard)[BOARD_SIZE];
 
-bool SinkTheShipServer::addPlayer(const int socket, const string &username) {
+    if (socket == _player1.socket)
+    {
+        playerWhoShoot = _player1;
+        playerWhoIsShooted = _player2;
+        shootedBoard = boardPlayer2;
+    } else if (socket == _player2.socket)
+    {
+        playerWhoShoot = _player2;
+        playerWhoIsShooted = _player1;
+        shootedBoard = boardPlayer1;
+    }
+    
+    char letter = 'A' - 1 + col;
+    const char* response = string("+Ok. Disparo en " + to_string(letter) + "," + to_string(row)).c_str();
+    send(playerWhoIsShooted.socket, response, strlen(response), 0);
+
+    Cell shootedCell = shootedBoard[col][row];
+
+    if (shootedCell == Cell::Boat)
+    {
+        shootedBoard[col][row] = Cell::Touched;
+        const char* response = string("+Ok. TOCADO: " + to_string(letter) + "," + to_string(row)).c_str();
+        send(playerWhoShoot.socket, response, strlen(response), 0);
+
+        const char* response = "+Ok. Turno de partida";
+        send(playerWhoShoot.socket, response, strlen(response), 0);
+    }else if (shootedCell == Cell::Touched)
+    {
+        shootedBoard[col][row] = Cell::Floaded;
+        const char* response = string("+Ok. Hundido: " + to_string(letter) + "," + to_string(row)).c_str();
+        send(playerWhoShoot.socket, response, strlen(response), 0);
+        const char* response = "+Ok. Turno de partida";
+        send(playerWhoShoot.socket, response, strlen(response), 0);
+    }
+    
+    
+
+}
+
+
+bool SinkTheShipServer::addPlayer(const int socket, std::shared_ptr<SocketState> socketState) {
     if (_free) {
         _player1.socket = socket;
-        _player1.username = username;
+        _player1.username = socketState -> user;
+        _player1.socketState = socketState;
         _free = false;
         return true;
     } else if (!_started) {
         _player2.socket = socket;
-        _player2.username = username;
+        _player2.username = socketState -> user;
+        _player2.socketState = socketState;
         _started = true;
         return true;
     }
@@ -33,14 +80,21 @@ bool SinkTheShipServer::addPlayer(const int socket, const string &username) {
 
 void SinkTheShipServer::closeGame(int socket)
 {
-    if (_player1.socket != -1)
-    {
-        //string sresponse = "La partida ha finalizado\n";
-        //const char* response = sresponse.c_str();
-        //send(socket, response, strlen(response), 0);
-    }
     
+    const char* response = "+Ok. Tu oponente ha terminado la partida";
+    send(
+        _player1.socket == socket
+            ? _player2.socket
+            : _player1.socket, 
+        response, 
+        strlen(response), 
+        0
+    );
 
+    _player1.socket = -1;
+    _player1.username = "";
+    _player2.socket = -1;
+    _player2.username = "";
 
     _started = false;
     _free = true;
