@@ -247,6 +247,11 @@ void Client::managePlayingMessage()
     {
         _game.playTurn(_buffer);
 
+        if (sbuffer.find("Turno de partida") != string::npos)
+            cout << "Es tu turno. Introduce el comando a ejecutar:" << endl;
+
+
+
     }
 
 }
