@@ -212,8 +212,8 @@ void Client::manageConnectedMessage()
     cout << _buffer << endl;
     if (gameBegins)
     {
-        _game.start(string(_buffer).substr(strlen("Ok. Empezamos partida")), BOARD_SIZE);
-        _game.showBoard();
+        _game.start(string(_buffer).substr(strlen("+Ok. Empezamos partida")), BOARD_SIZE);
+        _game.showBoard(_buffer);
         _state = Playing;
     }
 }
@@ -224,22 +224,25 @@ void Client::manageWaitingForGameMessage()
     cout << _buffer << endl;
     if (gameBegins)
     {
-        _game.start(string(_buffer).substr(strlen("Ok. Empezamos partida")), BOARD_SIZE);
-        _game.showBoard();
-        _state = Playing; cout << "Empezamos" << endl;
+        _game.start(string(_buffer).substr(strlen("+Ok. Empezamos partida")), BOARD_SIZE);
+        _game.showBoard(_buffer);
+        cout << "Es tu turno. Escribe tu comando:" << endl;
+        _state = Playing;
     }
+    cout << "hemos llegado desde waiting" << endl;
 }
 
 void Client::managePlayingMessage()
 {
-    string sbuffer = _buffer; cout << _buffer << "estamos aquí " << endl;
+    string sbuffer = _buffer; 
+    cout << _buffer << endl;
     if (sbuffer.find("-Err") != string::npos or sbuffer.find("Turno de partida") != string::npos)
         cout << _buffer << endl;
     else
     {
         // TODO make logic for whether the game ends in this turn
         _game.playTurn(_buffer);
-        _game.showBoard();
 
     }
+
 }

@@ -93,7 +93,7 @@ class SinkTheShipClient {
 
 
         // Shows the board via stdout
-        void showBoard();
+        void showBoard(const string &buffer);
 
 
     private:
@@ -105,6 +105,8 @@ class SinkTheShipClient {
             Floaded,
             Unkwown,
         };
+
+        int cellPosinChar2Int(const char c);
         
         int _boardSize;
 

@@ -173,7 +173,10 @@ void SinkTheShipClient::start(const string &board, const int boardSize)
             }
         }
     }
-    // TODO the same but for opponent
+
+
+    _opponentBoard = vector< vector<Cell> >(_boardSize, vector<Cell>(_boardSize, Cell::Unkwown));
+
     cout << "game starting" << endl;
 }
 
@@ -185,21 +188,62 @@ void SinkTheShipClient::start(const string &board, const int boardSize)
 // @param buffer received from server
 void SinkTheShipClient::playTurn(const std::string &buffer)
 {
-    // TODO
+    int pos;
+    int x;
+    char y;
+    if ((pos=buffer.find("AGUA: ")) != string::npos)
+    {
+        pos += strlen("AGUA: ");
+        y = buffer[pos];
+        x = stoi(buffer.substr(pos+2));
+        _opponentBoard[cellPosinChar2Int(y)][x] = Water;
+        showBoard(buffer);
+        cout << "Agua" << endl;
+    } else if ((pos=buffer.find("TOCADO: ")) != string::npos)
+    {
+        pos += strlen("TOCADO: ");
+        y = buffer[pos];
+        x = stoi(buffer.substr(pos+2));
+        _opponentBoard[cellPosinChar2Int(y)][x] = Touched;
+        showBoard(buffer);
+        cout << "Tocado" << endl;
+    } else if ((pos=buffer.find("HUNDIDO: ")) != string::npos)
+    {
+        pos += strlen("HUNDIDO: ");
+        y = buffer[pos];
+        x = stoi(buffer.substr(pos+2));
+        _opponentBoard[cellPosinChar2Int(y)][x] = Floaded;
+        showBoard(buffer);
+        cout << "Hundido" << endl;
+    } else if (buffer.find("Disparo en:"))
+    {
+        pos += strlen("HUNDIDO: ");
+        y = buffer[pos];
+        x = stoi(buffer.substr(pos+2));
+        _opponentBoard[cellPosinChar2Int(y)][x] = Floaded;
+        showBoard(buffer);
+        cout << "El oponente ha disparado en " << y << x << endl;
+    }
+
+
 
     return ;
 }
 
 // Shows the board via stdout the board
-void SinkTheShipClient::showBoard()
+void SinkTheShipClient::showBoard(const string &buffer)
 {
     clearScreen();
     cout << "Here goes the board" << endl << endl;
 
     cout << "********* MY BOARD *********" << endl << endl;
 
+    cout << "   A B C D E F G H I J" << endl;
+    int index=1;
     for (auto row: _myBoard)
     {
+        cout << index << ((index==10)?" ": "  ");
+        index++;
         for (auto i: row)
         {
             switch (i)
@@ -214,9 +258,45 @@ void SinkTheShipClient::showBoard()
         }
         cout << endl;
     }
+    cout << endl << endl << endl;
+
+    cout << "********* OPPONENT BOARD *********" << endl << endl;
+    cout << "   A B C D E F G H I J" << endl;
+    cout << "   -------------------" << endl;
+    index = 1; 
+    for (auto row: _opponentBoard)
+    {
+        cout << index << ((index==10)?" ": "  ");
+        index++;
+        for (auto i: row)
+        {
+            switch (i)
+            {
+                case Boat: cout << 'B'; break;
+                case Water: cout << 'A'; break;
+                case Touched: cout << 'T'; break;
+                case Floaded: cout << 'H'; break;
+                default: throw runtime_error("Not allowed cell");
+            }
+            cout << ' ';
+        }
+        cout << endl;
+    }
+    cout << endl << endl << endl;
     
 
-    // TODO the same but for opponent
+
+
+
+
+
+
+
+
+
+    if (buffer.find("Turno de partida") != string::npos)
+        cout << "Es tu turno. Introduce el comando a ejecutar:" << endl;
+
 }
 
 
@@ -255,7 +335,21 @@ std::string getCellString(Cell cell)
 
 
 
-
+int cellPosinChar2Int(const char c) {
+    switch(c) {
+        case 'A': return 1;
+        case 'B': return 2;
+        case 'C': return 3;
+        case 'D': return 4;
+        case 'E': return 5;
+        case 'F': return 6;
+        case 'G': return 7;
+        case 'H': return 8;
+        case 'I': return 9;
+        case 'J': return 10;
+        default: return -1;
+    }
+}
 
 
 
@@ -263,7 +357,7 @@ int main2()
 {
     SinkTheShipClient game;
     game.start("A,A,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;B,B,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;A,B,A,B,A,B,A,B,A,A;A,A,A,A,A,A,A,A,A,A;A,A,B,B,B,B,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A", 10);
-    game.showBoard();
+    game.showBoard("Turno de partida");
 
     return 0;
 }
