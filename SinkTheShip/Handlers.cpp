@@ -56,7 +56,6 @@ void Handlers::handleShoot(int socket, std::shared_ptr<SocketState> socketState,
 
     char letter = buffer[8];
     int col = letterToColumn(letter);
-    cout << "letter" << letter << col << endl; 
     int row = stoi(string(buffer).substr(10))-1;
 
     if (col > 9 or row > 9 or col < 0 or row < 0)

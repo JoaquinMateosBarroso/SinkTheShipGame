@@ -24,6 +24,7 @@ enum Cell {
     Unkwown,
 };
 
+
 struct Player {
     int socket = -1;
     string username = "";
@@ -104,13 +105,7 @@ class SinkTheShipClient {
 
     private:
 
-        enum Cell {
-            Boat,
-            Water,
-            Touched,
-            Floaded,
-            Unkwown,
-        };
+
 
         int cellPosinChar2Int(const char c);
         
@@ -129,8 +124,6 @@ class SinkTheShipClient {
 ************************************************************/
 void clearScreen();
 
-#endif
-
 
 
 
@@ -145,3 +138,20 @@ bool isValidPlacement(Cell board[BOARD_SIZE][BOARD_SIZE], int x, int y, int dire
 void placeBoat(Cell board[BOARD_SIZE][BOARD_SIZE], int size);
 
 std::string getCellString(Cell cell);
+
+
+
+
+
+bool isShipSunk(vector< vector<Cell> > board, int row, int col);
+
+bool isShipSunk(Cell (*board)[BOARD_SIZE], int row, int col);
+
+
+void markShipAsSunk(vector< vector<Cell> > board, int row, int col);
+
+void markShipAsSunk(Cell (*board)[BOARD_SIZE],int row, int col);
+
+
+#endif
+

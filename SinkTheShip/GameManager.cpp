@@ -19,8 +19,8 @@ int GameManager::startGame(const int socket, std::shared_ptr<SocketState> socket
         _games[_waitingGame].createBoards();
         std::string response1 = "+Ok. Empezamos partida." + _games[_waitingGame].getStringBoard(1);
         std::string response2 = "+Ok. Empezamos partida." + _games[_waitingGame].getStringBoard(2);
-        send(socket, response1.c_str(), response1.length(), 0);
-        send(_games[_waitingGame].getPlayer(1).socket, response2.c_str(), response2.length(), 0);
+        send(_games[_waitingGame].getPlayer(1).socket, response1.c_str(), response1.length(), 0);
+        send(socket, response2.c_str(), response2.length(), 0);
         _games[_waitingGame].start();
 
         int aux = _waitingGame;

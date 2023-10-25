@@ -212,7 +212,7 @@ void Client::manageConnectedMessage()
     cout << _buffer << endl;
     if (gameBegins)
     {
-        _game.start(string(_buffer).substr(strlen("+Ok. Empezamos partida")), BOARD_SIZE);
+        _game.start(string(_buffer).substr(strlen("+Ok. Empezamos partida.")), BOARD_SIZE);
         _game.showBoard(_buffer);
         _state = Playing;
     }

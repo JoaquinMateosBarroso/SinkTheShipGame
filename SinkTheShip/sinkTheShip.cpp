@@ -34,41 +34,80 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
     }
     
     char letter = 'A' + col;
-    string responseSTR = string("+Ok. Disparo en: ") + letter + "," + to_string(row+1);
-    const char* response = responseSTR.c_str();
-    send(playerWhoIsShooted.socket, response, strlen(response), 0); 
+    string response = string("+Ok. Disparo en: ") + letter + "," + to_string(row+1);
+    send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0); 
 
-    Cell shootedCell = shootedBoard[col][row+1];
+    Cell shootedCell = shootedBoard[row][col];
 
     if (shootedCell == Cell::Boat)
     {
-        shootedBoard[col][row+1] = Cell::Touched;
-        const char* response = string(string("+Ok. TOCADO: ") + letter + "," + to_string(row+1)).c_str();
-        send(playerWhoShoot.socket, response, strlen(response), 0);
+        if (isShipSunk(shootedBoard, row, col))
+        {
+            shootedBoard[row][col] = Cell::Floaded;
+            response = string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1);
+        }
+        else
+        {
+            shootedBoard[row][col] = Cell::Touched;
+            response = string("+Ok. TOCADO: ") + letter + "," + to_string(row+1);
+        }    
+        
+        send(playerWhoShoot.socket, response.c_str(), response.length(), 0); cout << "mando:" << response << endl;
+
+        playerWhoIsShooted.socketState -> isYourTurn = true;
+        playerWhoShoot.socketState -> isYourTurn = false;
 
         response = "+Ok. Turno de partida";
-        send(playerWhoShoot.socket, response, strlen(response), 0);
+        send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0);
     }else if (shootedCell == Cell::Touched)
     {
-        shootedBoard[col][row+1] = Cell::Floaded;
-        const char* response = string(string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1)).c_str();
-        send(playerWhoShoot.socket, response, strlen(response), 0);
+        shootedBoard[row][col] = Cell::Floaded;
+        string response = string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1);
+        send(playerWhoShoot.socket, response.c_str(), response.length(), 0);
+
+        playerWhoIsShooted.socketState -> isYourTurn = true;
+        playerWhoShoot.socketState -> isYourTurn = false;
         
         response = "+Ok. Turno de partida";
-        send(playerWhoShoot.socket, response, strlen(response), 0);
+        send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0);
     } else if (shootedCell == Cell::Water)
     {
-        const char* response = string(std::string("+Ok. AGUA: ") + letter + "," + to_string(row+1)).c_str();
-        send(playerWhoShoot.socket, response, strlen(response), 0);
+        string response = std::string("+Ok. AGUA: ") + letter + "," + to_string(row+1);
+        send(playerWhoShoot.socket, response.c_str(), response.length(), 0);
         
         playerWhoIsShooted.socketState -> isYourTurn = true;
         playerWhoShoot.socketState -> isYourTurn = false;
 
         response = "+Ok. Turno de partida";
-        send(playerWhoIsShooted.socket, response, strlen(response), 0);
+        send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0);
     }
     
-    
+        cout << "Here goes the board" << endl << endl;
+
+    cout << "********* Tablero disparado *********" << endl << endl;
+
+    cout << "   A B C D E F G H I J" << endl;
+    cout << "   -------------------" << endl;
+    int index=1;
+    for (int i = 0; i < 10; i++)
+    {
+        cout << index << ((index==10)?" ": "  ");
+        index++;
+        for (int j = 0; j < 10; j++)
+        {
+            switch (shootedBoard[i][j])
+            {
+                case Boat: cout << 'B'; break;
+                case Water: cout << 'A'; break;
+                case Touched: cout << 'T'; break;
+                case Floaded: cout << 'H'; break;
+                default: throw runtime_error("Not allowed cell");
+            }
+            cout << ' ';
+        }
+        cout << endl;
+    }
+    cout << endl << endl << endl;
 
 }
 
@@ -117,9 +156,9 @@ void SinkTheShipServer::closeGame(int socket)
 
 void SinkTheShipServer::start(){
     _started = true;
-    const char* response = "+Ok. Turno de partida";
+    string response = "+Ok. Turno de partida";
     _player1.socketState -> isYourTurn = true;
-    send(_player1.socket, response, strlen(response), 0);
+    send(_player1.socket, response.c_str(), response.length(), 0);
 }
 
 
@@ -146,8 +185,6 @@ void SinkTheShipServer::createBoards()
     placeBoat(boardPlayer2, 3);
     placeBoat(boardPlayer2, 2);
     placeBoat(boardPlayer2, 2);
-    
-
 }
 
 void placeBoat(Cell board[BOARD_SIZE][BOARD_SIZE], int size) {
@@ -200,7 +237,7 @@ std::string SinkTheShipServer::getStringBoard(int i)
     {
         for (int k = 0; k < BOARD_SIZE; k++)
         {
-            out += getCellString(board[j][k]);
+            out += getCellString(board[j][k]) + (k<BOARD_SIZE-1? ",": "");
         }
         out += (j==(BOARD_SIZE-1)? ".": ";");
     }
@@ -224,22 +261,41 @@ std::string SinkTheShipServer::getStringBoard(int i)
 
 void SinkTheShipClient::start(const string &board, const int boardSize)
 {
-    
+    cout << "board:" << board << endl;
     _boardSize = boardSize;
 
     // Initialize a vector to store the matrix
     _myBoard = vector< vector<Cell> >(_boardSize, vector<Cell>(_boardSize, Cell::Water));
 
-    // Loop through the matrix and populate it
+
+    vector<string> filas;
+    size_t startPos = 0, end = 0;
+    while (((end = board.find(';', startPos)) != string::npos) or ((end = board.find('.', startPos)) != string::npos)) {
+        string fila = board.substr(startPos, end - startPos);
+        filas.push_back(fila);
+        startPos = end + 1;
+        cout << "fila" << filas.back() << endl;
+    }
+
     for (int i = 0; i < _boardSize; ++i) {
-        for (int j = 0; j < _boardSize; j++)
-        {
-            if (board[(2*_boardSize*i) + 2*j] == 'B')
-            {
+        for (int j = 0; j < _boardSize; ++j) {
+            cout << "Entramos"<< i << j <<  filas.size()<< endl;
+            char valor = filas[i][2*j];
+
+            cout << "valor:" << valor << endl;
+
+            // Asignar Water o Boat según el valor del carácter
+            if (valor == 'A') {
+                _myBoard[i][j] = Cell::Water;
+            } else if (valor == 'B') {
                 _myBoard[i][j] = Cell::Boat;
             }
+
         }
     }
+
+
+
 
 
     _opponentBoard = vector< vector<Cell> >(_boardSize, vector<Cell>(_boardSize, Cell::Unkwown));
@@ -285,13 +341,29 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
         showBoard(buffer);
         cout << "Hundido" << endl;
     } else if ((pos=buffer.find("Disparo en: ")) != string::npos)
-    { cout << buffer[pos] <<"pepito"<< buffer[pos+2] <<endl;
-        pos += strlen("Disparo en: ");
+    { 
+        pos+= strlen("Disparo en: ");
+        cout << buffer << endl;
+        cout << buffer[pos] <<"-pepito-"<< buffer[pos+2] <<endl;
         y = buffer[pos];
-        x = stoi(buffer.substr(pos+2))-1;
-        bool touched = _opponentBoard[x][cellPosinChar2Int(y)]==Boat;
+        x= stoi(buffer.substr(pos+2))-1;
+        bool touched = (_myBoard[x][cellPosinChar2Int(y)]==Boat);
+
         if (touched)
-            _opponentBoard[x][cellPosinChar2Int(y)] = Touched;
+        {
+            if (isShipSunk(_myBoard, x, cellPosinChar2Int(y)))
+            {
+                markShipAsSunk(_myBoard, x, cellPosinChar2Int(y));
+                cout << "hundido" << endl;
+            }
+            else
+            {
+                _myBoard[x][cellPosinChar2Int(y)USUARIO pepe
+PASSWORD 123
+INICIAR-PARTIDA
+] = Touched;
+            }
+        }
         showBoard(buffer);
         cout << "El oponente ha disparado en " << y << x+1;
         if (touched)
@@ -310,7 +382,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
 // Shows the board via stdout the board
 void SinkTheShipClient::showBoard(const string &buffer)
 {
-    clearScreen();
+    // clearScreen();
     cout << "Here goes the board" << endl << endl;
 
     cout << "********* MY BOARD *********" << endl << endl;
@@ -411,19 +483,7 @@ std::string getCellString(Cell cell)
 
 
 int cellPosinChar2Int(const char c) {
-    switch(c) {
-        case 'A': return 1;
-        case 'B': return 2;
-        case 'C': return 3;
-        case 'D': return 4;
-        case 'E': return 5;
-        case 'F': return 6;
-        case 'G': return 7;
-        case 'H': return 8;
-        case 'I': return 9;
-        case 'J': return 10;
-        default: return -1;
-    }
+    return (int) c-'A';
 }
 
 
@@ -435,4 +495,175 @@ int main2()
     game.showBoard("Turno de partida");
 
     return 0;
+}
+
+
+
+
+
+
+
+bool isShipSunk(vector <vector <Cell> > board, int row, int col)
+{
+    if (board[row][col] == Cell::Boat) {
+        // El barco ha sido tocado
+        // Verificar si todas las celdas del barco han sido tocadas
+        // Comprobar hacia arriba
+        for (int r = row - 1; r >= 0; r--) {
+            if (board[r][col] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia abajo
+        for (int r = row + 1; r < BOARD_SIZE; r++) {
+            if (board[r][col] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia la izquierda
+        for (int c = col - 1; c >= 0; c--) {
+            if (board[row][c] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia la derecha
+        for (int c = col + 1; c < BOARD_SIZE; c++) {
+            if (board[row][c] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Todas las celdas del barco han sido tocadas, el barco está hundido
+        return true;
+    }
+    return false; // No es un barco
+}
+
+
+bool isShipSunk(Cell (*board)[BOARD_SIZE], int row, int col){
+    if (board[row][col] == Cell::Boat) {
+        // El barco ha sido tocado
+        // Verificar si todas las celdas del barco han sido tocadas
+        // Comprobar hacia arriba
+        for (int r = row - 1; r >= 0; r--) {
+            if (board[r][col] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia abajo
+        for (int r = row + 1; r < BOARD_SIZE; r++) {
+            if (board[r][col] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia la izquierda
+        for (int c = col - 1; c >= 0; c--) {
+            if (board[row][c] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Comprobar hacia la derecha
+        for (int c = col + 1; c < BOARD_SIZE; c++) {
+            if (board[row][c] != Cell::Touched) {
+                return false; // No todas las celdas del barco han sido tocadas
+            }
+        }
+        // Todas las celdas del barco han sido tocadas, el barco está hundido
+        return true;
+    }
+    return false; // No es un barco
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void markShipAsSunk(vector< vector <Cell> > board, int row, int col)
+{
+    if (board[row][col] == Cell::Boat) {
+        // El barco ha sido tocado
+        // Marcar todas las celdas del barco como "hundido" (Floaded)
+        // Comenzar desde la celda tocada
+        board[row][col] = Cell::Floaded;
+        // Comprobar hacia arriba
+        for (int r = row - 1; r >= 0; r--) {
+            if (board[r][col] == Cell::Boat) {
+                board[r][col] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia arriba
+            }
+        }
+        // Comprobar hacia abajo
+        for (int r = row + 1; r < BOARD_SIZE; r++) {
+            if (board[r][col] == Cell::Boat) {
+                board[r][col] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia abajo
+            }
+        }
+        // Comprobar hacia la izquierda
+        for (int c = col - 1; c >= 0; c--) {
+            if (board[row][c] == Cell::Boat) {
+                board[row][c] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia la izquierda
+            }
+        }
+        // Comprobar hacia la derecha
+        for (int c = col + 1; c < BOARD_SIZE; c++) {
+            if (board[row][c] == Cell::Boat) {
+                board[row][c] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia la derecha
+            }
+        }
+    }
+}
+
+
+void markShipAsSunk(Cell (*board)[BOARD_SIZE],int row, int col) {
+    if (board[row][col] == Cell::Boat) {
+        // El barco ha sido tocado
+        // Marcar todas las celdas del barco como "hundido" (Floaded)
+        // Comenzar desde la celda tocada
+        board[row][col] = Cell::Floaded;
+        // Comprobar hacia arriba
+        for (int r = row - 1; r >= 0; r--) {
+            if (board[r][col] == Cell::Boat) {
+                board[r][col] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia arriba
+            }
+        }
+        // Comprobar hacia abajo
+        for (int r = row + 1; r < BOARD_SIZE; r++) {
+            if (board[r][col] == Cell::Boat) {
+                board[r][col] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia abajo
+            }
+        }
+        // Comprobar hacia la izquierda
+        for (int c = col - 1; c >= 0; c--) {
+            if (board[row][c] == Cell::Boat) {
+                board[row][c] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia la izquierda
+            }
+        }
+        // Comprobar hacia la derecha
+        for (int c = col + 1; c < BOARD_SIZE; c++) {
+            if (board[row][c] == Cell::Boat) {
+                board[row][c] = Cell::Floaded;
+            } else {
+                break; // No hay más celdas del barco hacia la derecha
+            }
+        }
+    }
 }
