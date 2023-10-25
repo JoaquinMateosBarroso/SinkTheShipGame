@@ -358,10 +358,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
             }
             else
             {
-                _myBoard[x][cellPosinChar2Int(y)USUARIO pepe
-PASSWORD 123
-INICIAR-PARTIDA
-] = Touched;
+                _myBoard[x][cellPosinChar2Int(y)] = Touched;
             }
         }
         showBoard(buffer);
