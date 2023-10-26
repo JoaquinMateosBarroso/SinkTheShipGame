@@ -23,6 +23,9 @@ int GameManager::startGame(const int socket, std::shared_ptr<SocketState> socket
         send(socket, response2.c_str(), response2.length(), 0);
         _games[_waitingGame].start();
 
+        cout << response1 << endl;
+        cout << response2 << endl;
+
         int aux = _waitingGame;
         _waitingGame = -1;
 

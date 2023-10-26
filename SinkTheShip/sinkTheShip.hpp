@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <Handlers.hpp>
 #include <memory>
 
@@ -31,10 +32,17 @@ struct Player {
     std::shared_ptr<SocketState> socketState;
 };
 
-
 class SinkTheShipServer {
     public:
         SinkTheShipServer() {
+            boardPlayer1 = vector<vector<Cell>>(10);
+            for (int i = 0; i < 10; i++) {
+                boardPlayer1[i].resize(10);
+            }
+            boardPlayer2 = vector<vector<Cell>>(10);
+            for (int i = 0; i < 10; i++) {
+                boardPlayer2[i].resize(10);
+            }
             _started = false;
             _free = true;
         }
@@ -75,8 +83,8 @@ class SinkTheShipServer {
         bool _free;
 
     private:
-        Cell boardPlayer1[BOARD_SIZE][BOARD_SIZE];
-        Cell boardPlayer2[BOARD_SIZE][BOARD_SIZE];
+        vector<vector<Cell>> boardPlayer1;
+        vector<vector<Cell>> boardPlayer2;
 };
 
 
@@ -133,9 +141,9 @@ void clearScreen();
 
 
 
-bool isValidPlacement(Cell board[BOARD_SIZE][BOARD_SIZE], int x, int y, int direction, int size);
+bool isValidPlacement(vector<vector<Cell>> board, int x, int y, int direction, int size);
 
-void placeBoat(Cell board[BOARD_SIZE][BOARD_SIZE], int size);
+void placeBoat(vector<vector<Cell>>& board, int size);
 
 std::string getCellString(Cell cell);
 
