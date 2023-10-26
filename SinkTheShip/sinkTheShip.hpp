@@ -151,14 +151,12 @@ std::string getCellString(Cell cell);
 
 
 
-bool isShipSunk(vector< vector<Cell> > board, int row, int col);
+bool isShipSunk(vector< vector<Cell> > board, int row, int col, vector<pair<int,int>> &visited);
 
-bool isShipSunk(Cell (*board)[BOARD_SIZE], int row, int col);
 
 
 void markShipAsSunk(vector< vector<Cell> > board, int row, int col);
 
-void markShipAsSunk(Cell (*board)[BOARD_SIZE],int row, int col);
 
 
 #endif
