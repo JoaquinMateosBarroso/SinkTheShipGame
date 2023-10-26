@@ -60,32 +60,6 @@ void makeShooted(vector<vector<Cell>>& shootedBoard, Player playerWhoShoot, Play
         send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0);
     }
     
-        cout << "Here goes the board" << endl << endl;
-
-    cout << "********* Tablero disparado *********" << endl << endl;
-
-    cout << "   A B C D E F G H I J" << endl;
-    cout << "   -------------------" << endl;
-    int index=1;
-    for (int i = 0; i < 10; i++)
-    {
-        cout << index << ((index==10)?" ": "  ");
-        index++;
-        for (int j = 0; j < 10; j++)
-        {
-            switch (shootedBoard[i][j])
-            {
-                case Boat: cout << 'B'; break;
-                case Water: cout << 'A'; break;
-                case Touched: cout << 'T'; break;
-                case Floaded: cout << 'H'; break;
-                default: throw runtime_error("Not allowed cell");
-            }
-            cout << ' ';
-        }
-        cout << endl;
-    }
-    cout << endl << endl << endl;
 }
 
 void SinkTheShipServer::shoot(int socket, int col, int row) {
@@ -503,15 +477,6 @@ int cellPosinChar2Int(const char c) {
 
 
 
-int main2()
-{
-    SinkTheShipClient game;
-    game.start("A,A,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;B,B,A,B,B,A,A,B,B,B;A,A,A,A,A,A,A,A,A,A;A,B,A,B,A,B,A,B,A,A;A,A,A,A,A,A,A,A,A,A;A,A,B,B,B,B,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A;A,A,A,A,A,A,A,A,A,A", 10);
-    game.showBoard("Turno de partida");
-
-    return 0;
-}
-
 
 
 bool buscarPar(const std::vector<std::pair<int, int>>& vec, const std::pair<int, int>& elemento) {
@@ -531,7 +496,6 @@ bool isInsideBoard(int row, int col, int numRows, int numCols) {
 
 bool isShipSunk(vector <vector <Cell> > board, int row, int col, vector<pair<int,int>> &visited)
 {
-    cout << row << col << endl;
     if (buscarPar(visited, pair<int,int>(row, col)))
     {
         return true;
@@ -624,50 +588,44 @@ void markShipAsSunk(vector< vector <Cell> > &board, int row, int col)
 }
 
 
-// bool isShipSunk(vector <vector <Cell> > board, int row, int col, vector<pair<int,int>> &visited)
-// {
-//     cout << row << col << endl;
-//     if (buscarPar(visited, pair<int,int>(row, col)))
-//     {
-//         visited.push_back(pair<int,int>(row, col));
-//         return true;
-//     }
+void markShipAsSunk(vector <vector <Cell> > &board, int row, int col, vector<pair<int,int>> &visited)
+{
+    if (buscarPar(visited, pair<int,int>(row, col))) // Está ya explorado?
+    {
+        visited.push_back(pair<int,int>(row, col));
+        return ;
+    }
 
-//     visited.push_back(pair<int,int>(row, col));
+    visited.push_back(pair<int,int>(row, col));
 
-//     if (board[row][col] == Boat)
-//         return false;
+    if (board[row][col] != Touched)
+        return ;
     
-//     if (board[row][col] == Water)
-//         return true;
-    
-//     int i, j;
+    int i, j;
 
-//     // Abajo
-//     i = row-1; 
-//     j = col;
-//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
-//         return false;
-    
-//     // Izquierda
-//     i = row; 
-//     j = col-1;
-//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
-//         return false;
+    // Abajo
+    i = row-1; 
+    j = col;
+    if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()))
+        markShipAsSunk(board, i, j, visited);
 
-//     // Arriba
-//     i = row+1; 
-//     j = col;
-//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
-//         return false;
+    // Izquierda
+    i = row; 
+    j = col-1;
+    if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()))
+        markShipAsSunk(board, i, j, visited);
 
-//     // Derecha
-//     i = row; 
-//     j = col+1;
-//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
-//         return false;
+    // Arriba
+    i = row+1; 
+    j = col;
+    if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()))
+        markShipAsSunk(board, i, j, visited);
+
+    // Derecha
+    i = row; 
+    j = col+1;
+    if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()))
+        markShipAsSunk(board, i, j, visited);
 
 
-//     // Si todas las celdas del barco están tocadas, entonces el barco está hundido
-//     return true;
-// }
+}
