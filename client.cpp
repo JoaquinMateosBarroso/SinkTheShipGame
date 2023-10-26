@@ -165,16 +165,23 @@ bool Client::manageTerminalInput()
 void Client::finish()
 {
     close(_socketDescriptor);
+    exit(0);
 }
 
 
 
 
-bool manageError(string buffer)
+bool Client::manageError(const string &buffer)
 {
     if (buffer.compare(0, 3, "-Err")) // It is not -Err
     {
         return false;
+    }
+
+    if (buffer.find("Desconexión servidor") != string::npos)
+    {
+        cout << "El servidor se ha desconectado, procedemos a salir" << endl;
+        finish();
     }
 
     cout << buffer << endl;
@@ -182,26 +189,16 @@ bool manageError(string buffer)
     return true;
 }
 
-bool Client::manageNonGameOk(string buffer)
+bool Client::manageNonGameOk(const string & buffer)
 {
-    bool gameBegins = false;
-    if (_state == Connected or _state == WaitingForGame)
-    {
-            if (buffer.find("+Ok") == string::npos) // It is not +Ok
-            {
-                if(strcmp(_buffer,"Desconexión servidor") == 0){
-                    cout << "El servidor se ha desconectado, salimos" << endl;
-                    close(_socketDescriptor);
-                }
-                return false;
-            }
+    bool gameBegins;
 
-            gameBegins = (buffer.find("+Ok. Empezamos partida") != std::string::npos);
-            return gameBegins;
-    }
-        
-    perror("Part of code that should not be accesible");
-    exit(-1);
+    if (buffer.find("+Ok. Esperando jugadores") != string::npos)
+        cout << "Puedes salir introduciendo SALIR" << endl;
+
+    gameBegins = (buffer.find("+Ok. Empezamos partida") != string::npos);
+
+    return gameBegins;
 }
 
 
@@ -229,7 +226,6 @@ void Client::manageWaitingForGameMessage()
         cout << "Es tu turno. Escribe tu comando:" << endl;
         _state = Playing;
     }
-    cout << "hemos llegado desde waiting" << endl;
 }
 
 void Client::managePlayingMessage()
@@ -238,7 +234,19 @@ void Client::managePlayingMessage()
     if (sbuffer.find("Tu oponente ha terminado la partida") != string::npos)
     {
         _state = Connected;
+        clearScreen();
+        cout << "Tu oponente ha terminado la partida, puedes volver a empezar o salir si quieres" << endl;
         return;
+    }
+
+    if (sbuffer.find("ha ganado") != string::npos)
+    {
+        clearScreen();
+        cout << "La partida ha finalizado" << endl;
+        cout << sbuffer.substr(strlen("+Ok.")+1) << endl;
+        cout << "Puedes introducir INICIAR-PARTIDA para buscar nueva partida, o SALIR para salir" << endl;
+
+        return ;
     }
     
     if (sbuffer.find("-Err") != string::npos or sbuffer.find("Turno de partida") != string::npos)

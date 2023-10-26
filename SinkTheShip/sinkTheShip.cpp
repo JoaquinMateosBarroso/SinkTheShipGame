@@ -61,7 +61,7 @@ void makeShooted(vector<vector<Cell>>& shootedBoard, Player playerWhoShoot, Play
             response = string("+Ok. TOCADO: ") + letter + "," + to_string(row+1);
         }    
         
-        send(playerWhoShoot.socket, response.c_str(), response.length(), 0); cout << "mando:" << response << endl;
+        send(playerWhoShoot.socket, response.c_str(), response.length(), 0);
 
         playerWhoIsShooted.socketState -> isYourTurn = true;
         playerWhoShoot.socketState -> isYourTurn = false;
@@ -93,33 +93,6 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
         _player2.nShoots++;
         makeShooted(boardPlayer1, _player2, _player1, col, row);
     }
-    
-    
-
-    cout << "********* Tablero player 2 *********" << endl << endl;
-
-    cout << "   A B C D E F G H I J" << endl;
-    cout << "   -------------------" << endl;
-    int index=1;
-    for (int i = 0; i < 10; i++)
-    {
-        cout << index << ((index==10)?" ": "  ");
-        index++;
-        for (int j = 0; j < 10; j++)
-        {
-            switch (boardPlayer2[i][j])
-            {
-                case Boat: cout << 'B'; break;
-                case Water: cout << 'A'; break;
-                case Touched: cout << 'T'; break;
-                case Floaded: cout << 'H'; break;
-                default: throw runtime_error("Not allowed cell");
-            }
-            cout << ' ';
-        }
-        cout << endl;
-    }
-    cout << endl << endl << endl;
 
 }
 
@@ -178,7 +151,6 @@ void SinkTheShipServer::start(){
 
 void SinkTheShipServer::createBoards()
 {
-    cout << "2" << endl;
     srand(time(nullptr));
     // Initialize cells to water
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -189,16 +161,16 @@ void SinkTheShipServer::createBoards()
     }
 
     // Place boats randomly on both boards
-    placeBoat(boardPlayer1, 4);
-    placeBoat(boardPlayer1, 3);
-    placeBoat(boardPlayer1, 3);
-    placeBoat(boardPlayer1, 2);
+    // placeBoat(boardPlayer1, 4);
+    // placeBoat(boardPlayer1, 3);
+    // placeBoat(boardPlayer1, 3);
+    // placeBoat(boardPlayer1, 2);
     placeBoat(boardPlayer1, 2);
     
-    placeBoat(boardPlayer2, 4);
-    placeBoat(boardPlayer2, 3);
-    placeBoat(boardPlayer2, 3);
-    placeBoat(boardPlayer2, 2);
+    // placeBoat(boardPlayer2, 4);
+    // placeBoat(boardPlayer2, 3);
+    // placeBoat(boardPlayer2, 3);
+    // placeBoat(boardPlayer2, 2);
     placeBoat(boardPlayer2, 2);
 
 }
