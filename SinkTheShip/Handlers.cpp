@@ -18,7 +18,7 @@ void Handlers::handleExit(int socket, std::shared_ptr<SocketState> socketState, 
 
     if (socketState -> game != -1)
     {
-        SinkTheShipServer game = gameManager -> getGame(socketState -> game);
+        SinkTheShipServer& game = gameManager -> getGame(socketState -> game);
         if (!game.isGameStarted())
         {
             game._free = true;
@@ -67,7 +67,7 @@ void Handlers::handleShoot(int socket, std::shared_ptr<SocketState> socketState,
     
     GameManager* gameManager = GameManager::getInstance();
 
-    SinkTheShipServer game = gameManager -> getGame(socketState -> game);
+    SinkTheShipServer& game = gameManager -> getGame(socketState -> game);
 
     game.shoot(socket, col, row);
 }

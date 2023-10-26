@@ -155,7 +155,7 @@ bool isShipSunk(vector< vector<Cell> > board, int row, int col, vector<pair<int,
 
 
 
-void markShipAsSunk(vector< vector<Cell> > board, int row, int col);
+void markShipAsSunk(vector< vector<Cell> > &board, int row, int col);
 
 
 

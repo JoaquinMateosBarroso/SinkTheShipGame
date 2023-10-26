@@ -32,7 +32,7 @@ void makeShooted(vector<vector<Cell>>& shootedBoard, Player playerWhoShoot, Play
         vector<pair<int,int>> visited;
         if (isShipSunk(shootedBoard, row, col, visited))
         {
-            shootedBoard[row][col] = Cell::Floaded;
+            markShipAsSunk(shootedBoard, row, col);
             response = string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1);
         }
         else
@@ -354,7 +354,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
         pos += strlen("HUNDIDO: ");
         y = buffer[pos];
         x = stoi(buffer.substr(pos+2))-1;
-        _opponentBoard[x][cellPosinChar2Int(y)] = Floaded;
+        markShipAsSunk(_opponentBoard, x, cellPosinChar2Int(y));
         showBoard(buffer);
         cout << "Hundido" << endl;
     } else if ((pos=buffer.find("Disparo en: ")) != string::npos)
@@ -365,20 +365,17 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
         y = buffer[pos];
         x= stoi(buffer.substr(pos+2))-1;
         bool touched = (_myBoard[x][cellPosinChar2Int(y)]==Boat);
-        _myBoard[x][cellPosinChar2Int(y)]=Touched;
 
         if (touched)
         {
-            cout << "empezamos a comprobar" << endl;
+            _myBoard[x][cellPosinChar2Int(y)]=Touched;
             vector <pair<int,int> > visited;
             if (isShipSunk(_myBoard, x, cellPosinChar2Int(y), visited))
             {
-                markShipAsSunk(_myBoard, x, cellPosinChar2Int(y));
                 touched = false;
+                markShipAsSunk(_myBoard, x, cellPosinChar2Int(y));
                 cout << "hundido" << endl;
             }
-
-            cout << "comprobado" << endl;
         }
         showBoard(buffer);
         cout << "El oponente ha disparado en " << y << x+1;
@@ -400,7 +397,7 @@ void SinkTheShipClient::playTurn(const std::string &buffer)
 // Shows the board via stdout the board
 void SinkTheShipClient::showBoard(const string &buffer)
 {
-    // clearScreen();
+    clearScreen();
     cout << "Here goes the board" << endl << endl;
 
     cout << "********* MY BOARD *********" << endl << endl;
@@ -536,7 +533,9 @@ bool isShipSunk(vector <vector <Cell> > board, int row, int col, vector<pair<int
 {
     cout << row << col << endl;
     if (buscarPar(visited, pair<int,int>(row, col)))
+    {
         return true;
+    }
 
     visited.push_back(pair<int,int>(row, col));
 
@@ -591,7 +590,7 @@ void markShipAsSunk(vector< vector <Cell> > &board, int row, int col)
     board[row][col] = Floaded;
     // Comprobar hacia arriba
     for (int r = row - 1; r >= 0; r--) {
-        if (board[r][col] == Cell::Boat) {
+        if (board[r][col] == Cell::Touched) {
             board[r][col] = Cell::Floaded;
         } else {
             break; // No hay más celdas del barco hacia arriba
@@ -599,23 +598,23 @@ void markShipAsSunk(vector< vector <Cell> > &board, int row, int col)
     }
     // Comprobar hacia abajo
     for (int r = row + 1; r < BOARD_SIZE; r++) {
-        if (board[r][col] == Cell::Boat) {
-            board[r][col] = Cell::Floaded;
+        if (board[r][col] == Touched) {
+            board[r][col] = Floaded;
         } else {
             break; // No hay más celdas del barco hacia abajo
         }
     }
     // Comprobar hacia la izquierda
     for (int c = col - 1; c >= 0; c--) {
-        if (board[row][c] == Cell::Boat) {
-            board[row][c] = Cell::Floaded;
+        if (board[row][c] == Touched) {
+            board[row][c] = Floaded;
         } else {
             break; // No hay más celdas del barco hacia la izquierda
         }
     }
     // Comprobar hacia la derecha
     for (int c = col + 1; c < BOARD_SIZE; c++) {
-        if (board[row][c] == Cell::Boat) {
+        if (board[row][c] == Cell::Touched) {
             board[row][c] = Cell::Floaded;
         } else {
             break; // No hay más celdas del barco hacia la derecha
@@ -623,3 +622,52 @@ void markShipAsSunk(vector< vector <Cell> > &board, int row, int col)
     }
 
 }
+
+
+// bool isShipSunk(vector <vector <Cell> > board, int row, int col, vector<pair<int,int>> &visited)
+// {
+//     cout << row << col << endl;
+//     if (buscarPar(visited, pair<int,int>(row, col)))
+//     {
+//         visited.push_back(pair<int,int>(row, col));
+//         return true;
+//     }
+
+//     visited.push_back(pair<int,int>(row, col));
+
+//     if (board[row][col] == Boat)
+//         return false;
+    
+//     if (board[row][col] == Water)
+//         return true;
+    
+//     int i, j;
+
+//     // Abajo
+//     i = row-1; 
+//     j = col;
+//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
+//         return false;
+    
+//     // Izquierda
+//     i = row; 
+//     j = col-1;
+//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
+//         return false;
+
+//     // Arriba
+//     i = row+1; 
+//     j = col;
+//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
+//         return false;
+
+//     // Derecha
+//     i = row; 
+//     j = col+1;
+//     if (i >= 0 && i < int(board.size()) && j >= 0 && j < int(board[0].size()) && !isShipSunk(board, i, j, visited))
+//         return false;
+
+
+//     // Si todas las celdas del barco están tocadas, entonces el barco está hundido
+//     return true;
+// }
