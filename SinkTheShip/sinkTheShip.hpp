@@ -30,6 +30,7 @@ struct Player {
     int socket = -1;
     string username = "";
     std::shared_ptr<SocketState> socketState;
+    int nShoots=0;
 };
 
 class SinkTheShipServer {

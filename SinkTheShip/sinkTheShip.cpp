@@ -19,6 +19,19 @@ using namespace std;
  * SinkTheShipServer
 *********************************************************/
 
+bool isTheGameFinished(vector<vector<Cell>>& shootedBoard) {
+    for (auto i:shootedBoard) {
+        for (auto j: i) {
+            if (j == Cell::Boat)
+            {
+                return false;
+            }
+            
+        }
+    }
+    return true;
+}
+
 void makeShooted(vector<vector<Cell>>& shootedBoard, Player playerWhoShoot, Player playerWhoIsShooted, int col, int row) {
     char letter = 'A' + col;
     string response = string("+Ok. Disparo en: ") + letter + "," + to_string(row+1);
@@ -34,6 +47,13 @@ void makeShooted(vector<vector<Cell>>& shootedBoard, Player playerWhoShoot, Play
         {
             markShipAsSunk(shootedBoard, row, col);
             response = string("+Ok. HUNDIDO: ") + letter + "," + to_string(row+1);
+
+            if (isTheGameFinished(shootedBoard)) {
+                response = "+Ok. " + playerWhoShoot.username + " ha ganado, número de disparos " + to_string(playerWhoShoot.nShoots);
+                send(playerWhoIsShooted.socket, response.c_str(), response.length(), 0);
+                send(playerWhoShoot.socket, response.c_str(), response.length(), 0);
+                return;
+            }
         }
         else
         {
@@ -66,9 +86,11 @@ void SinkTheShipServer::shoot(int socket, int col, int row) {
     
     if (socket == _player1.socket)
     {
+        _player1.nShoots++;
         makeShooted(boardPlayer2, _player1, _player2, col, row);
     } else if (socket == _player2.socket)
     {
+        _player2.nShoots++;
         makeShooted(boardPlayer1, _player2, _player1, col, row);
     }
     
@@ -107,12 +129,14 @@ bool SinkTheShipServer::addPlayer(const int socket, std::shared_ptr<SocketState>
         _player1.socket = socket;
         _player1.username = socketState -> user;
         _player1.socketState = socketState;
+        _player1.nShoots = 0;
         _free = false;
         return true;
     } else if (!_started) {
         _player2.socket = socket;
         _player2.username = socketState -> user;
         _player2.socketState = socketState;
+        _player2.nShoots = 0;
         _started = true;
         return true;
     }
@@ -165,16 +189,16 @@ void SinkTheShipServer::createBoards()
     }
 
     // Place boats randomly on both boards
-    placeBoat(boardPlayer1, 4);
-    placeBoat(boardPlayer1, 3);
-    placeBoat(boardPlayer1, 3);
-    placeBoat(boardPlayer1, 2);
-    placeBoat(boardPlayer1, 2);
-    
-    placeBoat(boardPlayer2, 4);
-    placeBoat(boardPlayer2, 3);
-    placeBoat(boardPlayer2, 3);
-    placeBoat(boardPlayer2, 2);
+    // placeBoat(boardPlayer1, 4);
+    // placeBoat(boardPlayer1, 3);
+    // placeBoat(boardPlayer1, 3);
+    // placeBoat(boardPlayer1, 2);
+    // placeBoat(boardPlayer1, 2);
+    // 
+    // placeBoat(boardPlayer2, 4);
+    // placeBoat(boardPlayer2, 3);
+    // placeBoat(boardPlayer2, 3);
+    // placeBoat(boardPlayer2, 2);
     placeBoat(boardPlayer2, 2);
 
 }
