@@ -161,16 +161,16 @@ void SinkTheShipServer::createBoards()
     }
 
     // Place boats randomly on both boards
-    // placeBoat(boardPlayer1, 4);
-    // placeBoat(boardPlayer1, 3);
-    // placeBoat(boardPlayer1, 3);
-    // placeBoat(boardPlayer1, 2);
+    placeBoat(boardPlayer1, 4);
+    placeBoat(boardPlayer1, 3);
+    placeBoat(boardPlayer1, 3);
+    placeBoat(boardPlayer1, 2);
     placeBoat(boardPlayer1, 2);
     
-    // placeBoat(boardPlayer2, 4);
-    // placeBoat(boardPlayer2, 3);
-    // placeBoat(boardPlayer2, 3);
-    // placeBoat(boardPlayer2, 2);
+    placeBoat(boardPlayer2, 4);
+    placeBoat(boardPlayer2, 3);
+    placeBoat(boardPlayer2, 3);
+    placeBoat(boardPlayer2, 2);
     placeBoat(boardPlayer2, 2);
 
 }
